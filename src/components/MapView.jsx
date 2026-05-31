@@ -137,7 +137,7 @@ export default function MapView({ selectedLocation, onLocationSelect, radius, an
       </MapContainer>
 
       {!selectedLocation && <HintOverlay isMobile={isMobile} />}
-      {selectedLocation && <StatusBar location={selectedLocation} radius={radius} isMobile={isMobile} />}
+      {selectedLocation && !isMobile && <StatusBar location={selectedLocation} radius={radius} />}
       {analysisResult && !isMobile && <Legend competitorCount={competitorCount} radius={radius} />}
     </div>
   )
@@ -162,9 +162,9 @@ function HintOverlay({ isMobile }) {
   )
 }
 
-function StatusBar({ location, radius, isMobile }) {
+function StatusBar({ location, radius }) {
   return (
-    <div style={{ ...s.statusBar, ...(isMobile ? s.statusBarMobile : {}) }}>
+    <div style={s.statusBar}>
       <div style={s.statusItem}>
         <svg width="9" height="9" viewBox="0 0 24 24" fill="var(--accent)" stroke="none">
           <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
@@ -246,9 +246,8 @@ const s = {
   },
   hintText: { fontSize: 11, fontWeight: 500, color: 'var(--txt-1)' },
 
-  /* Mobile overrides */
-  hintMobile: { bottom: 260, fontSize: 12, padding: '7px 14px' },
-  statusBarMobile: { bottom: 246 },
+  /* Mobile hint override */
+  hintMobile: { bottom: 260 },
 
   /* Status bar (bottom-left) */
   statusBar: {
