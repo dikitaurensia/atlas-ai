@@ -85,7 +85,7 @@ function ZoomControl() {
   )
 }
 
-export default function MapView({ selectedLocation, onLocationSelect, radius, analysisResult }) {
+export default function MapView({ selectedLocation, onLocationSelect, radius, analysisResult, isMobile }) {
   const competitorCount = analysisResult?.competitors?.length || 0
 
   return (
@@ -133,12 +133,12 @@ export default function MapView({ selectedLocation, onLocationSelect, radius, an
           </Marker>
         ))}
 
-        <ZoomControl />
+        {!isMobile && <ZoomControl />}
       </MapContainer>
 
-      {!selectedLocation && <HintOverlay />}
-      {selectedLocation && <StatusBar location={selectedLocation} radius={radius} />}
-      {analysisResult && <Legend competitorCount={competitorCount} radius={radius} />}
+      {!selectedLocation && <HintOverlay isMobile={isMobile} />}
+      {selectedLocation && <StatusBar location={selectedLocation} radius={radius} isMobile={isMobile} />}
+      {analysisResult && !isMobile && <Legend competitorCount={competitorCount} radius={radius} />}
     </div>
   )
 }
@@ -148,9 +148,9 @@ const popupStyle = {
   fontFamily: 'Inter, sans-serif', padding: '2px 0',
 }
 
-function HintOverlay() {
+function HintOverlay({ isMobile }) {
   return (
-    <div style={s.hint}>
+    <div style={{ ...s.hint, ...(isMobile ? s.hintMobile : {}) }}>
       <div style={s.hintDot}>
         <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
           <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
@@ -162,9 +162,9 @@ function HintOverlay() {
   )
 }
 
-function StatusBar({ location, radius }) {
+function StatusBar({ location, radius, isMobile }) {
   return (
-    <div style={s.statusBar}>
+    <div style={{ ...s.statusBar, ...(isMobile ? s.statusBarMobile : {}) }}>
       <div style={s.statusItem}>
         <svg width="9" height="9" viewBox="0 0 24 24" fill="var(--accent)" stroke="none">
           <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
@@ -245,6 +245,10 @@ const s = {
     display: 'flex', alignItems: 'center', justifyContent: 'center',
   },
   hintText: { fontSize: 11, fontWeight: 500, color: 'var(--txt-1)' },
+
+  /* Mobile overrides */
+  hintMobile: { bottom: 260, fontSize: 12, padding: '7px 14px' },
+  statusBarMobile: { bottom: 246 },
 
   /* Status bar (bottom-left) */
   statusBar: {

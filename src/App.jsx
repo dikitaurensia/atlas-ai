@@ -3,6 +3,9 @@ import Header from './components/Header'
 import Sidebar from './components/Sidebar'
 import MapView from './components/MapView'
 import RiwayatSider from './components/RiwayatSider'
+import MobileHeader from './components/MobileHeader'
+import MobileBottomSheet from './components/MobileBottomSheet'
+import useIsMobile from './hooks/useIsMobile'
 import './App.css'
 
 const INITIAL_HISTORY = [
@@ -27,6 +30,7 @@ export default function App() {
   const [savedKey, setSavedKey] = useState(null)
   const abortRef = useRef(null)
   const nextId = useRef(INITIAL_HISTORY.length + 1)
+  const isMobile = useIsMobile()
 
   const runAnalysis = (latlng, category, r) => {
     if (abortRef.current) abortRef.current.abort()
@@ -110,6 +114,54 @@ export default function App() {
     setRiwayatOpen(false)
   }
 
+  const sharedRiwayat = (
+    <RiwayatSider
+      open={riwayatOpen}
+      onClose={() => setRiwayatOpen(false)}
+      historyItems={historyItems}
+      onItemClick={handleHistoryItemClick}
+    />
+  )
+
+  const sharedMap = (
+    <MapView
+      selectedLocation={selectedLocation}
+      onLocationSelect={handleLocationSelect}
+      radius={radius}
+      analysisResult={analysisResult}
+      isMobile={isMobile}
+    />
+  )
+
+  if (isMobile) {
+    return (
+      <div className="app">
+        <MobileHeader
+          historyCount={historyItems.length}
+          onRiwayatClick={() => setRiwayatOpen(true)}
+          onLocationSearch={handleLocationSearch}
+        />
+        {sharedRiwayat}
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+          {sharedMap}
+        </div>
+        <MobileBottomSheet
+          selectedCategory={selectedCategory}
+          onCategoryChange={handleCategoryChange}
+          radius={radius}
+          onRadiusChange={setRadius}
+          onAnalyze={handleAnalyze}
+          canAnalyze={!!selectedCategory && !!selectedLocation}
+          isAnalyzing={isAnalyzing}
+          analysisResult={analysisResult}
+          onSave={handleSave}
+          isSaved={!!savedKey}
+          selectedLocation={selectedLocation}
+        />
+      </div>
+    )
+  }
+
   return (
     <div className="app">
       <Header
@@ -117,12 +169,7 @@ export default function App() {
         onRiwayatClick={() => setRiwayatOpen(true)}
         onLocationSearch={handleLocationSearch}
       />
-      <RiwayatSider
-        open={riwayatOpen}
-        onClose={() => setRiwayatOpen(false)}
-        historyItems={historyItems}
-        onItemClick={handleHistoryItemClick}
-      />
+      {sharedRiwayat}
       <div className="app-body">
         <Sidebar
           selectedCategory={selectedCategory}
