@@ -2,6 +2,7 @@ import { useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import html2canvas from 'html2canvas'
 import jsPDF from 'jspdf'
+import useIsMobile from '../hooks/useIsMobile'
 
 const CATEGORY_ICONS = {
   'Ayam Goreng': '🍗', 'Kopi & Cafe': '☕', 'Mie & Bakso': '🍜',
@@ -25,6 +26,12 @@ function scoreColor(s) {
 export default function PDFPreviewModal({ open, onClose, result, category, location }) {
   const previewRef = useRef(null)
   const [downloading, setDownloading] = useState(false)
+  const isMobile = useIsMobile()
+
+  // Scale A4 page (595px) to fit mobile screen
+  const pageScale = isMobile
+    ? Math.min(1, (window.innerWidth - 16) / 595)
+    : 1
 
   if (!open || !result) return null
 
@@ -35,8 +42,12 @@ export default function PDFPreviewModal({ open, onClose, result, category, locat
   const handleDownload = async () => {
     if (!previewRef.current) return
     setDownloading(true)
+    // Temporarily remove zoom for full-resolution capture
+    const el = previewRef.current
+    const prevZoom = el.style.zoom
+    el.style.zoom = '1'
     try {
-      const canvas = await html2canvas(previewRef.current, {
+      const canvas = await html2canvas(el, {
         scale: 2, useCORS: true, backgroundColor: '#ffffff', logging: false,
       })
       const imgData = canvas.toDataURL('image/png')
@@ -48,13 +59,22 @@ export default function PDFPreviewModal({ open, onClose, result, category, locat
       const ds = new Date().toISOString().slice(0, 10).replace(/-/g, '')
       pdf.save(`ESB_AtlasAI_${(category ?? 'Analisis').replace(/\s/g, '')}_${ds}_${lat}_${lng}.pdf`)
     } finally {
+      el.style.zoom = prevZoom // restore
       setDownloading(false)
     }
   }
 
+  const overlayStyle = isMobile
+    ? { ...s.overlay, padding: 0, alignItems: 'flex-end' }
+    : s.overlay
+
+  const modalStyle = isMobile
+    ? { ...s.modal, maxWidth: '100%', maxHeight: '100vh', borderRadius: '14px 14px 0 0' }
+    : s.modal
+
   return createPortal(
-    <div style={s.overlay} onClick={e => e.target === e.currentTarget && onClose()}>
-      <div style={s.modal}>
+    <div style={overlayStyle} onClick={e => e.target === e.currentTarget && onClose()}>
+      <div style={modalStyle}>
 
         {/* Modal chrome — dark */}
         <div style={s.chrome}>
@@ -97,8 +117,8 @@ export default function PDFPreviewModal({ open, onClose, result, category, locat
         </div>
 
         {/* Document viewer background */}
-        <div style={s.viewer}>
-          <div ref={previewRef} style={s.page}>
+        <div style={{ ...s.viewer, ...(isMobile ? s.viewerMobile : {}) }}>
+          <div ref={previewRef} style={{ ...s.page, zoom: pageScale }}>
 
             {/* ── Page header banner ── */}
             <div style={s.banner}>
@@ -289,6 +309,7 @@ const s = {
   },
 
   /* Document viewer area */
+  viewerMobile: { padding: '12px 8px 20px' },
   viewer: {
     flex: 1, overflowY: 'auto', background: '#0D1117',
     padding: '20px 20px 28px',
