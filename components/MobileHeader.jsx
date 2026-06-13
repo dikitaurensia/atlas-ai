@@ -1,3 +1,5 @@
+'use client'
+
 import { useState } from 'react'
 import { createPortal } from 'react-dom'
 
@@ -182,7 +184,6 @@ const s = {
     border: '2px solid rgba(255,107,43,0.3)',
   },
 
-  /* Search overlay */
   searchOverlay: {
     position: 'fixed', inset: 0, zIndex: 9999,
     background: 'var(--sb-bg)',

@@ -1,8 +1,10 @@
+'use client'
+
 import { useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import html2canvas from 'html2canvas'
 import jsPDF from 'jspdf'
-import useIsMobile from '../hooks/useIsMobile'
+import useIsMobile from '@/hooks/useIsMobile'
 
 const CATEGORY_ICONS = {
   'Ayam Goreng': '🍗', 'Kopi & Cafe': '☕', 'Mie & Bakso': '🍜',
@@ -28,12 +30,12 @@ export default function PDFPreviewModal({ open, onClose, result, category, locat
   const [downloading, setDownloading] = useState(false)
   const isMobile = useIsMobile()
 
+  if (!open || !result) return null
+
   // Scale A4 page (595px) to fit mobile screen
   const pageScale = isMobile
     ? Math.min(1, (window.innerWidth - 16) / 595)
     : 1
-
-  if (!open || !result) return null
 
   const today = new Date().toLocaleDateString('id-ID', {
     day: 'numeric', month: 'long', year: 'numeric',
@@ -272,7 +274,6 @@ const s = {
     boxShadow: '0 32px 80px rgba(0,0,0,0.5)',
   },
 
-  /* Chrome — dark */
   chrome: {
     display: 'flex', alignItems: 'center', justifyContent: 'space-between',
     padding: '12px 16px', flexShrink: 0,
@@ -308,7 +309,6 @@ const s = {
     borderRadius: '50%', animation: 'spin 0.8s linear infinite',
   },
 
-  /* Document viewer area */
   viewerMobile: { padding: '12px 8px 20px' },
   viewer: {
     flex: 1, overflowY: 'auto', background: '#0D1117',
@@ -316,7 +316,6 @@ const s = {
     display: 'flex', justifyContent: 'center', alignItems: 'flex-start',
   },
 
-  /* A4 page */
   page: {
     width: 595, background: '#fff',
     fontFamily: 'Inter, -apple-system, sans-serif',
@@ -326,7 +325,6 @@ const s = {
     overflow: 'hidden',
   },
 
-  /* Banner */
   banner: {
     display: 'flex', alignItems: 'center', justifyContent: 'space-between',
     padding: '18px 28px',
@@ -344,7 +342,6 @@ const s = {
   bannerDocType: { fontSize: 9, fontWeight: 800, letterSpacing: '1px', color: '#FF6B2B' },
   bannerDate: { fontSize: 10, color: '#94A3B8', marginTop: 2 },
 
-  /* Location strip */
   locStrip: {
     display: 'flex', alignItems: 'center', gap: 8,
     padding: '10px 28px',
@@ -362,7 +359,6 @@ const s = {
     fontSize: 10, color: '#94A3B8', fontWeight: 500,
   },
 
-  /* Score block */
   scoreBlock: {
     display: 'flex', alignItems: 'stretch',
     padding: '20px 28px', gap: 20, borderBottom: '1px solid #F1F5F9',
@@ -389,7 +385,6 @@ const s = {
   dimBarFill: { height: '100%', borderRadius: 2 },
   dimScore: { fontSize: 10, fontWeight: 800, width: 22, textAlign: 'right', flexShrink: 0 },
 
-  /* Metrics row */
   metricsRow: {
     display: 'flex', gap: 0,
     borderBottom: '1px solid #F1F5F9',
@@ -409,7 +404,6 @@ const s = {
   tagsRow: { display: 'flex', flexWrap: 'wrap', gap: 4 },
   tag: { fontSize: 9, fontWeight: 600, padding: '3px 7px', borderRadius: 4 },
 
-  /* AI block */
   aiBlock: {
     margin: '0 28px', padding: '12px 14px',
     background: '#FAFAFF', border: '1px solid #EDE9FE',
@@ -420,7 +414,6 @@ const s = {
   aiLabel: { fontSize: 8, fontWeight: 800, letterSpacing: '0.7px', color: '#7C3AED' },
   aiText: { fontSize: 10, color: '#374151', lineHeight: 1.65, margin: 0 },
 
-  /* Footer */
   footer: {
     padding: '10px 28px 14px',
     borderTop: '1px solid #F1F5F9',

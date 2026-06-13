@@ -1,3 +1,5 @@
+'use client'
+
 import { useState, useRef, useEffect } from 'react'
 import CategoryPicker from './CategoryPicker'
 import RadiusSlider from './RadiusSlider'
@@ -24,7 +26,7 @@ export default function MobileBottomSheet({
     if (analysisResult || isAnalyzing) setExpanded(true)
   }, [analysisResult, isAnalyzing])
 
-  const fullH = Math.round(window.innerHeight * FULL_H)
+  const fullH = Math.round((typeof window !== 'undefined' ? window.innerHeight : 800) * FULL_H)
   const currentH = expanded ? fullH : PEEK_H
   const displayH = dragging ? Math.max(PEEK_H, Math.min(fullH, currentH - dragDelta)) : currentH
 

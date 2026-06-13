@@ -1,3 +1,5 @@
+'use client'
+
 import { useEffect } from 'react'
 import { MapContainer, TileLayer, useMapEvents, Circle, Marker, Popup, useMap } from 'react-leaflet'
 import L from 'leaflet'
@@ -212,7 +214,6 @@ const BORDER = 'rgba(255,255,255,0.08)'
 const s = {
   wrap: { flex: 1, position: 'relative', overflow: 'hidden' },
 
-  /* Zoom control */
   zoomWrap: {
     position: 'absolute', bottom: 72, right: 14, zIndex: 800,
     display: 'flex', flexDirection: 'column',
@@ -228,7 +229,6 @@ const s = {
   },
   zoomDivider: { height: 1, background: 'rgba(255,255,255,0.07)' },
 
-  /* Hint pill */
   hint: {
     position: 'absolute', bottom: 20, left: '50%', transform: 'translateX(-50%)',
     zIndex: 800, display: 'flex', alignItems: 'center', gap: 8,
@@ -245,11 +245,8 @@ const s = {
     display: 'flex', alignItems: 'center', justifyContent: 'center',
   },
   hintText: { fontSize: 11, fontWeight: 500, color: 'var(--txt-1)' },
-
-  /* Mobile hint override */
   hintMobile: { bottom: 260 },
 
-  /* Status bar (bottom-left) */
   statusBar: {
     position: 'absolute', bottom: 14, left: 14, zIndex: 800,
     display: 'flex', alignItems: 'center', gap: 8,
@@ -263,7 +260,6 @@ const s = {
   statusRadius: { fontSize: 10, fontWeight: 500, color: 'var(--txt-2)' },
   statusSep: { width: 1, height: 12, background: 'rgba(255,255,255,0.1)' },
 
-  /* Legend (top-right) */
   legend: {
     position: 'absolute', top: 14, right: 14, zIndex: 800,
     background: GLASS, backdropFilter: 'blur(10px)',

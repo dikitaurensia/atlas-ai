@@ -1,3 +1,5 @@
+'use client'
+
 import { useState, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 
@@ -259,7 +261,6 @@ const s = {
   wsDot: { width: 6, height: 6, borderRadius: '50%', background: '#10B981', flexShrink: 0 },
   wsName: { color: 'var(--txt-2)', fontWeight: 600, fontSize: 11 },
 
-  /* Search outer — relative parent for dropdown */
   searchOuter: {
     flex: 1, maxWidth: 400, position: 'relative',
   },
@@ -307,7 +308,6 @@ const s = {
     whiteSpace: 'nowrap', pointerEvents: 'none',
   },
 
-  /* Dropdown */
   dropdown: {
     background: 'var(--sb-surface)',
     border: '1px solid var(--sb-border-md)',
@@ -344,7 +344,6 @@ const s = {
     overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
   },
 
-  /* Actions */
   actions: { display: 'flex', alignItems: 'center', gap: 5, marginLeft: 'auto', flexShrink: 0 },
   iconBtn: {
     width: 32, height: 32, borderRadius: 7,

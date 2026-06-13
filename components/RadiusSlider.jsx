@@ -1,3 +1,5 @@
+'use client'
+
 const MIN = 200, MAX = 1500
 const MARKS = [200, 500, 1000, 1500]
 

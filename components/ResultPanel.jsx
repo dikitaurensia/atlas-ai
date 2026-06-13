@@ -1,3 +1,5 @@
+'use client'
+
 import { useState } from 'react'
 import PDFPreviewModal from './PDFPreviewModal'
 
@@ -128,53 +130,6 @@ export default function ResultPanel({ result, onSave, isSaved, category, locatio
 
       </div>
     </>
-  )
-}
-
-/* Radar chart SVG */
-function RadarChart({ dimensions }) {
-  const size = 110
-  const cx = size / 2, cy = size / 2
-  const maxR = 42
-  const n = dimensions.length
-  const angle = i => (i * (2 * Math.PI) / n) - Math.PI / 2
-
-  const gridPoly = pct =>
-    dimensions.map((_, i) => {
-      const a = angle(i)
-      return `${cx + maxR * pct * Math.cos(a)},${cy + maxR * pct * Math.sin(a)}`
-    }).join(' ')
-
-  const dataPoly = dimensions.map((d, i) => {
-    const a = angle(i)
-    const r = maxR * (d.score / 100)
-    return `${cx + r * Math.cos(a)},${cy + r * Math.sin(a)}`
-  }).join(' ')
-
-  const dataPoints = dimensions.map((d, i) => {
-    const a = angle(i)
-    return { x: cx + maxR * (d.score/100) * Math.cos(a), y: cy + maxR * (d.score/100) * Math.sin(a) }
-  })
-
-  return (
-    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ flexShrink: 0 }}>
-      {[0.25, 0.5, 0.75, 1].map(p => (
-        <polygon key={p} points={gridPoly(p)}
-          fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="1"/>
-      ))}
-      {dimensions.map((_, i) => {
-        const a = angle(i)
-        return <line key={i} x1={cx} y1={cy}
-          x2={cx + maxR * Math.cos(a)} y2={cy + maxR * Math.sin(a)}
-          stroke="rgba(255,255,255,0.06)" strokeWidth="1"/>
-      })}
-      <polygon points={dataPoly}
-        fill="rgba(255,107,43,0.12)"
-        stroke="var(--accent)" strokeWidth="1.5" strokeLinejoin="round"/>
-      {dataPoints.map((p, i) => (
-        <circle key={i} cx={p.x} cy={p.y} r="2.5" fill="var(--accent)"/>
-      ))}
-    </svg>
   )
 }
 

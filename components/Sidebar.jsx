@@ -1,3 +1,5 @@
+'use client'
+
 import CategoryPicker from './CategoryPicker'
 import RadiusSlider from './RadiusSlider'
 import ResultPanel from './ResultPanel'

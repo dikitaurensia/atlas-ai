@@ -1,3 +1,5 @@
+'use client'
+
 const CATEGORIES = [
   { id: 'Ayam Goreng', icon: '🍗', label: 'Ayam Goreng' },
   { id: 'Kopi & Cafe', icon: '☕', label: 'Kopi & Cafe' },

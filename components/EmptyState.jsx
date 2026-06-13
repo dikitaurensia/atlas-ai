@@ -1,3 +1,5 @@
+'use client'
+
 const STEPS = [
   { n: 1, label: 'Pilih kategori bisnis' },
   { n: 2, label: 'Klik titik di peta' },
