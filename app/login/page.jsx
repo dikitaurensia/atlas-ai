@@ -9,14 +9,28 @@ export default function LoginPage() {
   const router = useRouter()
   const [form, setForm] = useState({ email: '', password: '' })
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
 
   const set = (key) => (e) => setForm(f => ({ ...f, [key]: e.target.value }))
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setLoading(true)
-    await new Promise(r => setTimeout(r, 800))
-    router.push('/analisis')
+    setError('')
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      })
+      const data = await res.json()
+      if (!res.ok) { setError(data.error || 'Login gagal'); return }
+      router.push('/analisis')
+    } catch {
+      setError('Gagal terhubung ke server')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -27,6 +41,8 @@ export default function LoginPage() {
         <div className={styles.formBox}>
           <h1 className={styles.formTitle}>Masuk ke AtlasAI</h1>
           <p className={styles.formSub}>Selamat datang kembali. Lanjutkan analisis lokasimu.</p>
+
+          {error && <div className={styles.formError}>{error}</div>}
 
           <form onSubmit={handleSubmit}>
             <div className={styles.fields}>

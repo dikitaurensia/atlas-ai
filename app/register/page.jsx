@@ -7,13 +7,14 @@ import styles from '../auth.module.css'
 
 export default function RegisterPage() {
   const router = useRouter()
-  const [form, setForm] = useState({ name: '', email: '', password: '', confirm: '' })
+  const [form, setForm] = useState({ name: '', bisnis: '', email: '', password: '', confirm: '' })
   const [errors, setErrors] = useState({})
+  const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
   const set = (key) => (e) => {
     setForm(f => ({ ...f, [key]: e.target.value }))
-    if (errors[key]) setErrors(e => ({ ...e, [key]: '' }))
+    if (errors[key]) setErrors(prev => ({ ...prev, [key]: '' }))
   }
 
   const validate = () => {
@@ -30,8 +31,25 @@ export default function RegisterPage() {
     const errs = validate()
     if (Object.keys(errs).length) { setErrors(errs); return }
     setLoading(true)
-    await new Promise(r => setTimeout(r, 900))
-    router.push('/analisis')
+    setError('')
+    try {
+      const res = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: form.name, bisnis_name: form.bisnis, email: form.email, password: form.password }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        if (res.status === 409) setErrors({ email: data.error })
+        else setError(data.error || 'Registrasi gagal')
+        return
+      }
+      router.push('/analisis')
+    } catch {
+      setError('Gagal terhubung ke server')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -42,6 +60,8 @@ export default function RegisterPage() {
         <div className={styles.formBox}>
           <h1 className={styles.formTitle}>Buat Akun Baru</h1>
           <p className={styles.formSub}>Mulai analisis lokasi FnB-mu secara gratis.</p>
+
+          {error && <div className={styles.formError}>{error}</div>}
 
           <form onSubmit={handleSubmit}>
             <div className={styles.fields}>
@@ -65,6 +85,8 @@ export default function RegisterPage() {
                     className={styles.input}
                     type="text"
                     placeholder="Nama brand / outlet"
+                    value={form.bisnis}
+                    onChange={set('bisnis')}
                     autoComplete="organization"
                   />
                 </div>
