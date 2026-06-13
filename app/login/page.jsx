@@ -92,7 +92,7 @@ export default function LoginPage() {
 }
 
 const DIMS = [
-  { label: 'Traffic',    val: 88, color: '#FF6B2B' },
+  { label: 'Traffic',    val: 88, color: '#2563EB' },
   { label: 'Persaingan', val: 72, color: '#F59E0B' },
   { label: 'Akses',      val: 91, color: '#10B981' },
 ]
@@ -112,11 +112,11 @@ function LeftPanel() {
         <div className={styles.leftLogoMark}>
           <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
             <path d="M8 1C5.24 1 3 3.24 3 6c0 4 5 9 5 9s5-5 5-9c0-2.76-2.24-5-5-5z" fill="white"/>
-            <circle cx="8" cy="6" r="2" fill="#FF6B2B"/>
+            <circle cx="8" cy="6" r="2" fill="#2563EB"/>
           </svg>
         </div>
         <span className={styles.leftLogoText}>
-          Atlas<span style={{ color: '#FF6B2B' }}>AI</span>
+          Atlas<span style={{ color: '#2563EB' }}>AI</span>
         </span>
       </Link>
 
@@ -161,11 +161,11 @@ function LeftPanel() {
                 <rect x="65" y="76" width="30" height="16" rx="2" fill="rgba(255,255,255,0.02)"/>
                 <rect x="127" y="74" width="26" height="16" rx="2" fill="rgba(255,255,255,0.018)"/>
                 {/* Radius rings */}
-                <circle cx="131" cy="70" r="48" stroke="rgba(255,107,43,0.28)" strokeWidth="1.5" fill="rgba(255,107,43,0.04)" strokeDasharray="7 4"/>
-                <circle cx="131" cy="70" r="22" stroke="rgba(255,107,43,0.1)" strokeWidth="1" fill="none"/>
+                <circle cx="131" cy="70" r="48" stroke="rgba(37,99,235,0.28)" strokeWidth="1.5" fill="rgba(37,99,235,0.04)" strokeDasharray="7 4"/>
+                <circle cx="131" cy="70" r="22" stroke="rgba(37,99,235,0.1)" strokeWidth="1" fill="none"/>
                 {/* Center pin */}
-                <circle cx="131" cy="70" r="9" fill="#FF6B2B" opacity="0.15"/>
-                <circle cx="131" cy="70" r="5.5" fill="#FF6B2B"/>
+                <circle cx="131" cy="70" r="9" fill="#2563EB" opacity="0.15"/>
+                <circle cx="131" cy="70" r="5.5" fill="#2563EB"/>
                 <circle cx="131" cy="70" r="2.5" fill="rgba(255,255,255,0.9)"/>
                 {/* Competitor pins */}
                 {PINS.map(([x, y, n]) => (

@@ -17,10 +17,10 @@
   --txt-4: #CBD5E1;
 
   /* Accent */
-  --accent:       #FF6B2B;
-  --accent-h:     #E55A1B;
-  --accent-bg:    rgba(255,107,43,0.08);
-  --accent-bd:    rgba(255,107,43,0.22);
+  --accent:       #2563EB;
+  --accent-h:     #1D4ED8;
+  --accent-bg:    rgba(37,99,235,0.08);
+  --accent-bd:    rgba(37,99,235,0.22);
 
   /* Semantic */
   --green:  #10B981;
@@ -61,7 +61,7 @@ input[type='range']::-webkit-slider-thumb {
   -webkit-appearance: none; appearance: none;
   width: 14px; height: 14px; border-radius: 50%;
   background: var(--accent); border: 2px solid #fff;
-  box-shadow: 0 1px 4px rgba(255,107,43,0.4);
+  box-shadow: 0 1px 4px rgba(37,99,235,0.4);
   cursor: pointer;
 }
 input[type='range']::-webkit-slider-runnable-track { height: 4px; border-radius: 2px; }

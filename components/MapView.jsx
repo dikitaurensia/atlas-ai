@@ -14,9 +14,9 @@ const pinIcon = L.divIcon({
       <div style="
         position:absolute;top:0;left:50%;margin-left:-18px;
         width:36px;height:36px;border-radius:50% 50% 50% 0;
-        background:linear-gradient(135deg,#FF6B2B,#FF9A5C);
+        background:linear-gradient(135deg,#2563EB,#60A5FA);
         border:2.5px solid rgba(255,255,255,0.15);
-        box-shadow:0 4px 20px rgba(255,107,43,0.6),0 0 0 4px rgba(255,107,43,0.15);
+        box-shadow:0 4px 20px rgba(37,99,235,0.6),0 0 0 4px rgba(37,99,235,0.15);
         transform:rotate(-45deg);
       "></div>
       <div style="
@@ -27,7 +27,7 @@ const pinIcon = L.divIcon({
       <div style="
         position:absolute;top:-6px;left:50%;margin-left:-24px;
         width:48px;height:48px;border-radius:50%;
-        border:1.5px solid rgba(255,107,43,0.4);
+        border:1.5px solid rgba(37,99,235,0.4);
         animation:pulse-ring 1.8s ease-out infinite;
       "></div>
     </div>
@@ -108,7 +108,7 @@ export default function MapView({ selectedLocation, onLocationSelect, radius, an
         {selectedLocation && (
           <>
             <Circle center={selectedLocation} radius={radius} pathOptions={{
-              color: '#FF6B2B', fillColor: '#FF6B2B',
+              color: '#2563EB', fillColor: '#2563EB',
               fillOpacity: 0.07, dashArray: '8 5', weight: 1.5,
             }}/>
             <Marker position={selectedLocation} icon={pinIcon}>
@@ -241,7 +241,7 @@ const s = {
   hintDot: {
     width: 22, height: 22, borderRadius: '50%', flexShrink: 0,
     background: 'var(--accent)',
-    boxShadow: '0 0 8px rgba(255,107,43,0.5)',
+    boxShadow: '0 0 8px rgba(37,99,235,0.5)',
     display: 'flex', alignItems: 'center', justifyContent: 'center',
   },
   hintText: { fontSize: 11, fontWeight: 500, color: 'var(--txt-1)' },
@@ -277,7 +277,7 @@ const s = {
   ldOrange: {
     width: 10, height: 10, borderRadius: '50%', flexShrink: 0,
     background: 'var(--accent)',
-    boxShadow: '0 0 6px rgba(255,107,43,0.5)',
+    boxShadow: '0 0 6px rgba(37,99,235,0.5)',
   },
   ldDark: {
     width: 10, height: 10, borderRadius: '50%', flexShrink: 0,
@@ -286,6 +286,6 @@ const s = {
   },
   ldDash: {
     width: 18, height: 0, flexShrink: 0,
-    borderTop: '2px dashed rgba(255,107,43,0.7)',
+    borderTop: '2px dashed rgba(37,99,235,0.7)',
   },
 }

@@ -198,7 +198,7 @@ const s = {
 
   profitCard: {
     padding: '12px 14px',
-    background: 'linear-gradient(135deg, rgba(255,107,43,0.1), rgba(255,107,43,0.04))',
+    background: 'linear-gradient(135deg, rgba(37,99,235,0.1), rgba(37,99,235,0.04))',
     borderRadius: 10,
     border: '1px solid var(--accent-bd)',
   },
@@ -244,7 +244,7 @@ const s = {
     flex: 2, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5,
     padding: '9px', border: 'none',
     borderRadius: 8, background: 'var(--accent)',
-    boxShadow: '0 4px 12px rgba(255,107,43,0.3)',
+    boxShadow: '0 4px 12px rgba(37,99,235,0.3)',
     color: '#fff', fontSize: 11, fontWeight: 700,
     cursor: 'pointer', fontFamily: 'inherit',
   },

@@ -79,7 +79,7 @@ export default function MobileHeader({ historyCount, onRiwayatClick, onLocationS
           <div style={s.logoMark}>
             <svg width="12" height="12" viewBox="0 0 16 16" fill="none">
               <path d="M8 1C5.24 1 3 3.24 3 6c0 4 5 9 5 9s5-5 5-9c0-2.76-2.24-5-5-5z" fill="white"/>
-              <circle cx="8" cy="6" r="2" fill="#FF6B2B"/>
+              <circle cx="8" cy="6" r="2" fill="#2563EB"/>
             </svg>
           </div>
           <div>
@@ -201,8 +201,8 @@ const s = {
   brand: { display: 'flex', alignItems: 'center', gap: 8 },
   logoMark: {
     width: 28, height: 28, borderRadius: 7, flexShrink: 0,
-    background: 'linear-gradient(135deg,#FF6B2B,#FF9A5C)',
-    boxShadow: '0 2px 8px rgba(255,107,43,0.3)',
+    background: 'linear-gradient(135deg,#2563EB,#60A5FA)',
+    boxShadow: '0 2px 8px rgba(37,99,235,0.3)',
     display: 'flex', alignItems: 'center', justifyContent: 'center',
   },
   logoText: { fontSize: 15, fontWeight: 800, color: 'var(--txt-1)', letterSpacing: '-0.4px', lineHeight: 1.2 },
@@ -224,10 +224,10 @@ const s = {
   },
   avatar: {
     width: 32, height: 32, borderRadius: '50%',
-    background: 'linear-gradient(135deg,#FF6B2B,#FF9A5C)',
+    background: 'linear-gradient(135deg,#2563EB,#60A5FA)',
     display: 'flex', alignItems: 'center', justifyContent: 'center',
     fontSize: 11, fontWeight: 800, color: '#fff',
-    border: '2px solid rgba(255,107,43,0.3)',
+    border: '2px solid rgba(37,99,235,0.3)',
   },
 
   searchOverlay: {
@@ -306,7 +306,7 @@ const s = {
   },
   profileDropAvatar: {
     width: 36, height: 36, borderRadius: '50%', flexShrink: 0,
-    background: 'linear-gradient(135deg,#FF6B2B,#FF9A5C)',
+    background: 'linear-gradient(135deg,#2563EB,#60A5FA)',
     display: 'flex', alignItems: 'center', justifyContent: 'center',
     fontSize: 14, fontWeight: 800, color: '#fff',
   },

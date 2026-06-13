@@ -130,7 +130,7 @@ export default function Header({ historyCount, onRiwayatClick, onLocationSearch 
         <div style={s.logoMark}>
           <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
             <path d="M8 1C5.24 1 3 3.24 3 6c0 4 5 9 5 9s5-5 5-9c0-2.76-2.24-5-5-5z" fill="white"/>
-            <circle cx="8" cy="6" r="2" fill="#FF6B2B"/>
+            <circle cx="8" cy="6" r="2" fill="#2563EB"/>
           </svg>
         </div>
         <div style={s.logoStack}>
@@ -289,8 +289,8 @@ const s = {
   esbText: { color: 'var(--txt-2)', fontWeight: 700 },
   logoMark: {
     width: 27, height: 27, borderRadius: 7, flexShrink: 0,
-    background: 'linear-gradient(135deg,#FF6B2B,#FF9A5C)',
-    boxShadow: '0 2px 8px rgba(255,107,43,0.3)',
+    background: 'linear-gradient(135deg,#2563EB,#60A5FA)',
+    boxShadow: '0 2px 8px rgba(37,99,235,0.3)',
     display: 'flex', alignItems: 'center', justifyContent: 'center',
   },
   logoText: { fontSize: 14, fontWeight: 800, color: 'var(--txt-1)', letterSpacing: '-0.4px' },
@@ -415,11 +415,11 @@ const s = {
   },
   avatarRing: {
     padding: 1.5, borderRadius: '50%',
-    background: 'linear-gradient(135deg,var(--accent),#FFAA80)',
+    background: 'linear-gradient(135deg,var(--accent),#93C5FD)',
   },
   avatarInner: {
     width: 24, height: 24, borderRadius: '50%',
-    background: 'linear-gradient(135deg,#FF6B2B,#FF9A5C)',
+    background: 'linear-gradient(135deg,#2563EB,#60A5FA)',
     display: 'flex', alignItems: 'center', justifyContent: 'center',
     fontSize: 9, fontWeight: 800, color: '#fff',
     border: '1.5px solid var(--sb-bg)',
@@ -444,7 +444,7 @@ const s = {
   },
   profileDropAvatar: {
     width: 36, height: 36, borderRadius: '50%', flexShrink: 0,
-    background: 'linear-gradient(135deg,#FF6B2B,#FF9A5C)',
+    background: 'linear-gradient(135deg,#2563EB,#60A5FA)',
     display: 'flex', alignItems: 'center', justifyContent: 'center',
     fontSize: 14, fontWeight: 800, color: '#fff',
   },

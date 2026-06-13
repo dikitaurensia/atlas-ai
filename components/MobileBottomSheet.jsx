@@ -177,7 +177,7 @@ const ls = {
   },
   ring: {
     width: 40, height: 40, borderRadius: '50%',
-    border: '2px solid rgba(255,107,43,0.25)',
+    border: '2px solid rgba(37,99,235,0.25)',
     borderTopColor: 'var(--accent)',
     animation: 'spin 0.8s linear infinite',
   },

@@ -65,8 +65,8 @@ function GeoIllustration() {
         <path d="M20 30 Q35 25 50 30 Q65 35 80 28" stroke="rgba(255,255,255,0.1)" strokeWidth="1.5" fill="none"/>
         <path d="M15 52 Q35 48 55 52 Q70 55 88 50" stroke="rgba(255,255,255,0.1)" strokeWidth="1.5" fill="none"/>
         {/* Pulse ring */}
-        <circle cx="50" cy="40" r="14" stroke="rgba(255,107,43,0.2)" strokeWidth="1" fill="none"/>
-        <circle cx="50" cy="40" r="9" stroke="rgba(255,107,43,0.35)" strokeWidth="1.5" fill="rgba(255,107,43,0.06)"/>
+        <circle cx="50" cy="40" r="14" stroke="rgba(37,99,235,0.2)" strokeWidth="1" fill="none"/>
+        <circle cx="50" cy="40" r="9" stroke="rgba(37,99,235,0.35)" strokeWidth="1.5" fill="rgba(37,99,235,0.06)"/>
         {/* Pin */}
         <circle cx="50" cy="40" r="4" fill="var(--accent)"/>
         <circle cx="50" cy="40" r="2" fill="white"/>
@@ -114,7 +114,7 @@ const s = {
     width: '100%', padding: '10px', border: 'none',
     borderRadius: 8, cursor: 'pointer',
     background: 'var(--accent)',
-    boxShadow: '0 4px 14px rgba(255,107,43,0.35)',
+    boxShadow: '0 4px 14px rgba(37,99,235,0.35)',
     color: '#fff', fontSize: 12, fontWeight: 700,
     fontFamily: 'inherit',
     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,

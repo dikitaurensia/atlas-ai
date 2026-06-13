@@ -128,11 +128,11 @@ export default function PDFPreviewModal({ open, onClose, result, category, locat
                 <div style={s.bannerLogo}>
                   <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
                     <path d="M8 1C5.24 1 3 3.24 3 6c0 4 5 9 5 9s5-5 5-9c0-2.76-2.24-5-5-5z" fill="white"/>
-                    <circle cx="8" cy="6" r="2" fill="#FF6B2B"/>
+                    <circle cx="8" cy="6" r="2" fill="#2563EB"/>
                   </svg>
                 </div>
                 <div>
-                  <div style={s.bannerBrand}>Atlas<span style={{ color: '#FF6B2B' }}>AI</span></div>
+                  <div style={s.bannerBrand}>Atlas<span style={{ color: '#2563EB' }}>AI</span></div>
                   <div style={s.bannerSub}>by ESB · Location Intelligence</div>
                 </div>
               </div>
@@ -293,11 +293,11 @@ const s = {
     display: 'flex', alignItems: 'center', gap: 6,
     padding: '7px 14px', border: 'none', borderRadius: 7,
     background: 'var(--accent)',
-    boxShadow: '0 3px 10px rgba(255,107,43,0.35)',
+    boxShadow: '0 3px 10px rgba(37,99,235,0.35)',
     color: '#fff', fontSize: 12, fontWeight: 700,
     cursor: 'pointer', fontFamily: 'inherit',
   },
-  dlBtnLoading: { background: 'rgba(255,107,43,0.5)', cursor: 'not-allowed' },
+  dlBtnLoading: { background: 'rgba(37,99,235,0.5)', cursor: 'not-allowed' },
   closeBtn: {
     width: 30, height: 30, borderRadius: 7,
     border: '1px solid var(--sb-border)', background: 'var(--sb-card)',
@@ -333,13 +333,13 @@ const s = {
   bannerLeft: { display: 'flex', alignItems: 'center', gap: 10 },
   bannerLogo: {
     width: 30, height: 30, borderRadius: 7, flexShrink: 0,
-    background: 'linear-gradient(135deg,#FF6B2B,#FF9A5C)',
+    background: 'linear-gradient(135deg,#2563EB,#60A5FA)',
     display: 'flex', alignItems: 'center', justifyContent: 'center',
   },
   bannerBrand: { fontSize: 16, fontWeight: 800, color: '#F8FAFC', letterSpacing: '-0.3px' },
   bannerSub: { fontSize: 9, color: '#64748B', marginTop: 1 },
   bannerRight: { textAlign: 'right' },
-  bannerDocType: { fontSize: 9, fontWeight: 800, letterSpacing: '1px', color: '#FF6B2B' },
+  bannerDocType: { fontSize: 9, fontWeight: 800, letterSpacing: '1px', color: '#2563EB' },
   bannerDate: { fontSize: 10, color: '#94A3B8', marginTop: 2 },
 
   locStrip: {
@@ -353,7 +353,7 @@ const s = {
     background: '#FFF7F3', border: '1px solid #FFD4B8',
   },
   locIcon: { fontSize: 13 },
-  locCat: { fontSize: 11, fontWeight: 700, color: '#FF6B2B' },
+  locCat: { fontSize: 11, fontWeight: 700, color: '#2563EB' },
   coordStrip: {
     display: 'flex', alignItems: 'center', gap: 4,
     fontSize: 10, color: '#94A3B8', fontWeight: 500,
@@ -398,7 +398,7 @@ const s = {
     fontSize: 8, fontWeight: 800, letterSpacing: '0.7px',
     color: '#9CA3AF', marginBottom: 8,
   },
-  profitRange: { fontSize: 18, fontWeight: 800, color: '#FF6B2B', marginBottom: 4, lineHeight: 1 },
+  profitRange: { fontSize: 18, fontWeight: 800, color: '#2563EB', marginBottom: 4, lineHeight: 1 },
   profitSep: { color: '#CBD5E1', fontWeight: 400, fontSize: 14 },
   profitNote: { fontSize: 9, color: '#9CA3AF' },
   tagsRow: { display: 'flex', flexWrap: 'wrap', gap: 4 },

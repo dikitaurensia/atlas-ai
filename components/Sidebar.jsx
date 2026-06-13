@@ -104,14 +104,14 @@ const s = {
   },
   pulseRing: {
     width: 52, height: 52, borderRadius: '50%',
-    border: '2px solid rgba(255,107,43,0.3)',
+    border: '2px solid rgba(37,99,235,0.3)',
     display: 'flex', alignItems: 'center', justifyContent: 'center',
     animation: 'pulse-ring 1.5s ease-out infinite',
   },
   pulseCore: {
     width: 20, height: 20, borderRadius: '50%',
     background: 'var(--accent)',
-    boxShadow: '0 0 12px rgba(255,107,43,0.5)',
+    boxShadow: '0 0 12px rgba(37,99,235,0.5)',
   },
   loadingTitle: { fontSize: 12, fontWeight: 700, color: 'var(--txt-1)' },
   loadingDesc: { fontSize: 10, color: 'var(--txt-3)', textAlign: 'center', marginTop: -4 },

@@ -11,8 +11,8 @@
 .left {
   width: 44%;
   flex-shrink: 0;
-  background: linear-gradient(145deg, #FFFBF9 0%, #FFF3EA 55%, #FFFAF7 100%);
-  border-right: 1px solid rgba(255, 107, 43, 0.1);
+  background: linear-gradient(145deg, #F8FAFC 0%, #EFF6FF 55%, #F8FAFC 100%);
+  border-right: 1px solid rgba(37, 99, 235, 0.1);
   display: flex;
   flex-direction: column;
   padding: 44px 48px;
@@ -27,7 +27,7 @@
   left: -80px;
   width: 440px;
   height: 440px;
-  background: radial-gradient(circle, rgba(255, 107, 43, 0.12) 0%, transparent 60%);
+  background: radial-gradient(circle, rgba(37, 99, 235, 0.12) 0%, transparent 60%);
   pointer-events: none;
 }
 
@@ -38,7 +38,7 @@
   right: -80px;
   width: 300px;
   height: 300px;
-  background: radial-gradient(circle, rgba(255, 107, 43, 0.05) 0%, transparent 60%);
+  background: radial-gradient(circle, rgba(37, 99, 235, 0.05) 0%, transparent 60%);
   pointer-events: none;
 }
 
@@ -55,11 +55,11 @@
   width: 34px;
   height: 34px;
   border-radius: 9px;
-  background: linear-gradient(135deg, #FF6B2B, #FF9A5C);
+  background: linear-gradient(135deg, #2563EB, #60A5FA);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 16px rgba(255, 107, 43, 0.35);
+  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.35);
   flex-shrink: 0;
 }
 
@@ -89,7 +89,7 @@
 }
 
 .leftAccent {
-  background: linear-gradient(135deg, #FF6B2B 0%, #FFAA80 100%);
+  background: linear-gradient(135deg, #2563EB 0%, #93C5FD 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -120,8 +120,8 @@
   width: 30px;
   height: 30px;
   border-radius: 8px;
-  background: rgba(255, 107, 43, 0.1);
-  border: 1px solid rgba(255, 107, 43, 0.2);
+  background: rgba(37, 99, 235, 0.1);
+  border: 1px solid rgba(37, 99, 235, 0.2);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -306,7 +306,7 @@
   cursor: pointer;
   font-family: inherit;
   transition: all 0.18s;
-  box-shadow: 0 4px 18px rgba(255, 107, 43, 0.3);
+  box-shadow: 0 4px 18px rgba(37, 99, 235, 0.3);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -316,7 +316,7 @@
 
 .submitBtn:hover:not(:disabled) {
   background: var(--accent-h);
-  box-shadow: 0 6px 24px rgba(255, 107, 43, 0.45);
+  box-shadow: 0 6px 24px rgba(37, 99, 235, 0.45);
   transform: translateY(-1px);
 }
 
@@ -436,7 +436,7 @@
   transform: translateX(-50%);
   width: 200px;
   height: 22px;
-  background: radial-gradient(ellipse at center, rgba(255, 107, 43, 0.2) 0%, transparent 70%);
+  background: radial-gradient(ellipse at center, rgba(37, 99, 235, 0.2) 0%, transparent 70%);
   filter: blur(8px);
   pointer-events: none;
 }
@@ -655,9 +655,9 @@
 .badge3dOrange {
   top: 8px;
   left: -4px;
-  background: rgba(255, 107, 43, 0.12);
-  border: 1px solid rgba(255, 107, 43, 0.26);
-  color: #FF8C4B;
+  background: rgba(37, 99, 235, 0.12);
+  border: 1px solid rgba(37, 99, 235, 0.26);
+  color: #3B82F6;
   transform: translateZ(74px);
 }
 
