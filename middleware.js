@@ -4,23 +4,31 @@ import { jwtVerify } from 'jose'
 const SECRET = () => new TextEncoder().encode(process.env.JWT_SECRET)
 const COOKIE = 'atlas_token'
 
-export async function middleware(request) {
-  const token = request.cookies.get(COOKIE)?.value
+const PUBLIC_ROUTES = ['/login', '/register']
 
-  if (!token) {
-    return NextResponse.redirect(new URL('/login', request.url))
+export async function middleware(request) {
+  const { pathname } = request.nextUrl
+  const token = request.cookies.get(COOKIE)?.value
+  const isPublic = PUBLIC_ROUTES.some(r => pathname.startsWith(r))
+
+  const isValid = await jwtVerify(token, SECRET()).then(() => true).catch(() => false)
+
+  if (isPublic) {
+    // Already logged in — skip auth pages
+    if (isValid) return NextResponse.redirect(new URL('/analisis', request.url))
+    return NextResponse.next()
   }
 
-  try {
-    await jwtVerify(token, SECRET())
-    return NextResponse.next()
-  } catch {
+  // Private route
+  if (!isValid) {
     const res = NextResponse.redirect(new URL('/login', request.url))
-    res.cookies.set(COOKIE, '', { maxAge: 0, path: '/' })
+    if (token) res.cookies.set(COOKIE, '', { maxAge: 0, path: '/' })
     return res
   }
+
+  return NextResponse.next()
 }
 
 export const config = {
-  matcher: ['/analisis/:path*'],
+  matcher: ['/login', '/register', '/analisis/:path*'],
 }
