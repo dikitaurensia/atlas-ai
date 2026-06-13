@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
+import { useRouter } from 'next/navigation'
 
 function useDebounce(value, delay) {
   const [dv, setDv] = useState(value)
@@ -28,6 +29,7 @@ const PLACE_ICONS = {
 }
 
 export default function Header({ historyCount, onRiwayatClick, onLocationSearch }) {
+  const router = useRouter()
   const [searchValue, setSearchValue] = useState('')
   const [searchFocused, setSearchFocused] = useState(false)
   const [results, setResults] = useState([])
@@ -37,6 +39,28 @@ export default function Header({ historyCount, onRiwayatClick, onLocationSearch 
   const searchOuterRef = useRef(null)
   const [dropRect, setDropRect] = useState(null)
   const debouncedSearch = useDebounce(searchValue, 380)
+
+  const [user, setUser] = useState(null)
+  const [profileOpen, setProfileOpen] = useState(false)
+  const profileRef = useRef(null)
+
+  useEffect(() => {
+    fetch('/api/auth/me').then(r => r.json()).then(d => { if (d.user) setUser(d.user) })
+  }, [])
+
+  useEffect(() => {
+    if (!profileOpen) return
+    const handler = (e) => { if (profileRef.current && !profileRef.current.contains(e.target)) setProfileOpen(false) }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [profileOpen])
+
+  const handleLogout = async () => {
+    await fetch('/api/auth/logout', { method: 'POST' })
+    router.push('/login')
+  }
+
+  const initial = user?.name?.[0]?.toUpperCase() || '?'
 
   /* Fetch results */
   useEffect(() => {
@@ -208,17 +232,41 @@ export default function Header({ historyCount, onRiwayatClick, onLocationSearch 
           </svg>
         </button>
 
-        <div style={s.avatarWrap}>
-          <div style={s.avatarRing}>
-            <div style={s.avatarInner}>A</div>
+        <div style={{ position: 'relative' }} ref={profileRef}>
+          <div style={s.avatarWrap} onClick={() => setProfileOpen(o => !o)}>
+            <div style={s.avatarRing}>
+              <div style={s.avatarInner}>{initial}</div>
+            </div>
+            <div style={s.avatarInfo}>
+              <span style={s.avatarName}>{user?.name || '…'}</span>
+              <span style={s.avatarRole}>ESB Member</span>
+            </div>
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="var(--txt-3)" strokeWidth="2.5"
+              style={{ transform: profileOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}>
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
           </div>
-          <div style={s.avatarInfo}>
-            <span style={s.avatarName}>Aileen</span>
-            <span style={s.avatarRole}>Admin</span>
-          </div>
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="var(--txt-3)" strokeWidth="2.5">
-            <polyline points="6 9 12 15 18 9"/>
-          </svg>
+
+          {profileOpen && (
+            <div style={s.profileDrop}>
+              <div style={s.profileDropHead}>
+                <div style={s.profileDropAvatar}>{initial}</div>
+                <div style={{ minWidth: 0 }}>
+                  <div style={s.profileDropName}>{user?.name}</div>
+                  <div style={s.profileDropEmail}>{user?.email}</div>
+                </div>
+              </div>
+              <div style={s.profileDropDivider} />
+              <button style={s.profileDropLogout} onClick={handleLogout}>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                  <polyline points="16 17 21 12 16 7"/>
+                  <line x1="21" y1="12" x2="9" y2="12"/>
+                </svg>
+                Keluar
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </header>
@@ -379,4 +427,41 @@ const s = {
   avatarInfo: { display: 'flex', flexDirection: 'column' },
   avatarName: { fontSize: 11, fontWeight: 700, color: 'var(--txt-1)', lineHeight: 1.3 },
   avatarRole: { fontSize: 9, color: 'var(--txt-3)', lineHeight: 1.3 },
+
+  profileDrop: {
+    position: 'absolute', top: 'calc(100% + 8px)', right: 0,
+    width: 220,
+    background: 'var(--sb-surface)',
+    border: '1px solid var(--sb-border-md)',
+    borderRadius: 12,
+    boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
+    overflow: 'hidden',
+    zIndex: 9999,
+  },
+  profileDropHead: {
+    display: 'flex', alignItems: 'center', gap: 10,
+    padding: '14px 14px 12px',
+  },
+  profileDropAvatar: {
+    width: 36, height: 36, borderRadius: '50%', flexShrink: 0,
+    background: 'linear-gradient(135deg,#FF6B2B,#FF9A5C)',
+    display: 'flex', alignItems: 'center', justifyContent: 'center',
+    fontSize: 14, fontWeight: 800, color: '#fff',
+  },
+  profileDropName: {
+    fontSize: 13, fontWeight: 700, color: 'var(--txt-1)',
+    overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+  },
+  profileDropEmail: {
+    fontSize: 11, color: 'var(--txt-3)', marginTop: 2,
+    overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+  },
+  profileDropDivider: { height: 1, background: 'var(--sb-border)', margin: '0' },
+  profileDropLogout: {
+    width: '100%', display: 'flex', alignItems: 'center', gap: 8,
+    padding: '11px 14px', border: 'none', background: 'transparent',
+    color: '#EF4444', fontSize: 13, fontWeight: 600,
+    cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left',
+    transition: 'background 0.12s',
+  },
 }

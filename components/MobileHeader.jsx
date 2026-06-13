@@ -1,13 +1,37 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
+import { useRouter } from 'next/navigation'
 
 export default function MobileHeader({ historyCount, onRiwayatClick, onLocationSearch }) {
+  const router = useRouter()
   const [searchOpen, setSearchOpen] = useState(false)
   const [searchValue, setSearchValue] = useState('')
   const [results, setResults] = useState([])
   const [loading, setLoading] = useState(false)
+
+  const [user, setUser] = useState(null)
+  const [profileOpen, setProfileOpen] = useState(false)
+  const profileRef = useRef(null)
+
+  useEffect(() => {
+    fetch('/api/auth/me').then(r => r.json()).then(d => { if (d.user) setUser(d.user) })
+  }, [])
+
+  useEffect(() => {
+    if (!profileOpen) return
+    const handler = (e) => { if (profileRef.current && !profileRef.current.contains(e.target)) setProfileOpen(false) }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [profileOpen])
+
+  const handleLogout = async () => {
+    await fetch('/api/auth/logout', { method: 'POST' })
+    router.push('/login')
+  }
+
+  const initial = user?.name?.[0]?.toUpperCase() || '?'
 
   const handleSearch = (q) => {
     setSearchValue(q)
@@ -78,7 +102,29 @@ export default function MobileHeader({ historyCount, onRiwayatClick, onLocationS
             </svg>
             {historyCount > 0 && <span style={s.badge}>{historyCount}</span>}
           </button>
-          <div style={s.avatar}>A</div>
+          <div style={{ position: 'relative' }} ref={profileRef}>
+            <div style={s.avatar} onClick={() => setProfileOpen(o => !o)}>{initial}</div>
+            {profileOpen && (
+              <div style={s.profileDrop}>
+                <div style={s.profileDropHead}>
+                  <div style={s.profileDropAvatar}>{initial}</div>
+                  <div style={{ minWidth: 0 }}>
+                    <div style={s.profileDropName}>{user?.name}</div>
+                    <div style={s.profileDropEmail}>{user?.email}</div>
+                  </div>
+                </div>
+                <div style={s.profileDropDivider} />
+                <button style={s.profileDropLogout} onClick={handleLogout}>
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                    <polyline points="16 17 21 12 16 7"/>
+                    <line x1="21" y1="12" x2="9" y2="12"/>
+                  </svg>
+                  Keluar
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </header>
 
@@ -243,4 +289,40 @@ const s = {
   },
   emptyHintText: { fontSize: 14, color: 'var(--txt-2)', fontWeight: 500, textAlign: 'center' },
   emptyHintSub: { fontSize: 12, color: 'var(--txt-3)', textAlign: 'center' },
+
+  profileDrop: {
+    position: 'absolute', top: 'calc(100% + 8px)', right: 0,
+    width: 220,
+    background: 'var(--sb-surface)',
+    border: '1px solid var(--sb-border-md)',
+    borderRadius: 12,
+    boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
+    overflow: 'hidden',
+    zIndex: 9999,
+  },
+  profileDropHead: {
+    display: 'flex', alignItems: 'center', gap: 10,
+    padding: '14px 14px 12px',
+  },
+  profileDropAvatar: {
+    width: 36, height: 36, borderRadius: '50%', flexShrink: 0,
+    background: 'linear-gradient(135deg,#FF6B2B,#FF9A5C)',
+    display: 'flex', alignItems: 'center', justifyContent: 'center',
+    fontSize: 14, fontWeight: 800, color: '#fff',
+  },
+  profileDropName: {
+    fontSize: 13, fontWeight: 700, color: 'var(--txt-1)',
+    overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+  },
+  profileDropEmail: {
+    fontSize: 11, color: 'var(--txt-3)', marginTop: 2,
+    overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+  },
+  profileDropDivider: { height: 1, background: 'var(--sb-border)' },
+  profileDropLogout: {
+    width: '100%', display: 'flex', alignItems: 'center', gap: 8,
+    padding: '11px 14px', border: 'none', background: 'transparent',
+    color: '#EF4444', fontSize: 13, fontWeight: 600,
+    cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left',
+  },
 }
