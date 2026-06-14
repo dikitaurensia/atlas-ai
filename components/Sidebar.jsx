@@ -80,7 +80,7 @@ function LoadingState({ category }) {
         {category ? `Memproses data ${category} & kompetitor` : 'Memproses data geospasial'}
       </p>
       <div style={s.loadingSteps}>
-        {['Google Places API', 'ESB Data Layer', 'AI Inference'].map((step, i) => (
+        {['Overpass API (OSM)', 'Neon PostgreSQL', 'BPS 2020 Demographics'].map((step, i) => (
           <div key={step} style={{ ...s.loadingStep, animationDelay: `${i * 0.3}s` }}>
             <div style={s.loadingDot} />
             <span style={s.loadingStepText}>{step}</span>
