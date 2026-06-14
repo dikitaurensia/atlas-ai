@@ -1,0 +1,15 @@
+node_modules
+.next
+.git
+dist-typeorm
+
+# Env files — pass secrets via docker-compose or runtime env
+.env
+.env.local
+.env.*.local
+
+# Dev/editor noise
+.DS_Store
+*.log
+.vscode
+.idea

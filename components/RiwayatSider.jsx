@@ -83,7 +83,8 @@ export default function RiwayatSider({ open, onClose, historyItems = [], onItemC
 
 function ListPanel({ historyItems, onClose, onItemClick }) {
   const [tab, setTab] = useState('semua')
-  const items = tab === 'semua' ? historyItems : historyItems.filter(h => h.saved)
+  const savedItems = historyItems.filter(h => h.saved)
+  const items = tab === 'semua' ? historyItems : savedItems
 
   return (
     <>
@@ -97,7 +98,7 @@ function ListPanel({ historyItems, onClose, onItemClick }) {
           </div>
           <div>
             <h2 style={s.title}>Riwayat Analisis</h2>
-            <p style={s.subtitle}>{historyItems.length} analisis tersimpan</p>
+            <p style={s.subtitle}>{historyItems.length} analisis · {savedItems.length} tersimpan</p>
           </div>
         </div>
         <button style={s.closeBtn} onClick={onClose}>
@@ -110,7 +111,7 @@ function ListPanel({ historyItems, onClose, onItemClick }) {
       <div style={s.tabs}>
         {[
           { key: 'semua',     label: 'Semua',     count: historyItems.length },
-          { key: 'tersimpan', label: 'Tersimpan', count: historyItems.filter(h => h.saved).length },
+          { key: 'tersimpan', label: 'Tersimpan', count: savedItems.length },
         ].map(t => (
           <button key={t.key}
             style={{ ...s.tab, ...(tab === t.key ? s.tabActive : {}) }}
@@ -167,7 +168,8 @@ function HistoryItem({ item, isLast, onClick }) {
       <div style={s.info}>
         <div style={s.topRow}>
           <span style={s.location}>{item.location}</span>
-          {hovered && (
+          {!item.saved && <span style={s.sessionBadge}>Sesi</span>}
+          {hovered && item.saved && (
             <span style={s.detailHint}>
               <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                 <path d="M5 12h14M12 5l7 7-7 7"/>
@@ -448,6 +450,13 @@ const s = {
   info: { flex: 1, display: 'flex', flexDirection: 'column', gap: 3, minWidth: 0 },
   topRow: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 6 },
   location: { fontSize: 13, fontWeight: 600, color: 'var(--txt-1)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
+  sessionBadge: {
+    flexShrink: 0,
+    fontSize: 8, fontWeight: 700, color: '#F59E0B',
+    background: 'rgba(245,158,11,0.1)', padding: '2px 6px',
+    borderRadius: 4, border: '1px solid rgba(245,158,11,0.25)',
+    whiteSpace: 'nowrap',
+  },
   detailHint: {
     display: 'flex', alignItems: 'center', gap: 3, flexShrink: 0,
     fontSize: 9, fontWeight: 600, color: 'var(--accent)',

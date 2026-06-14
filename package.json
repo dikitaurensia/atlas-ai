@@ -6,24 +6,46 @@
     "dev": "next dev --turbo",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "typeorm": "tsx ./node_modules/typeorm/cli.js",
+    "migration:run": "npm run typeorm -- migration:run -d typeorm.config.ts",
+    "migration:revert": "npm run typeorm -- migration:revert -d typeorm.config.ts",
+    "migration:generate": "npm run typeorm -- migration:generate -d typeorm.config.ts",
+    "migration:show": "npm run typeorm -- migration:show -d typeorm.config.ts",
+    "seed": "tsx --tsconfig tsconfig.typeorm.json database/seeds/run.ts",
+    "test": "node --env-file=.env.local --experimental-vm-modules node_modules/.bin/jest --testEnvironment node --runInBand"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "testMatch": ["**/tests/**/*.test.js"],
+    "transform": {}
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.1.0",
     "bcryptjs": "^3.0.3",
+    "dotenv": "^17.4.2",
     "html2canvas": "^1.4.1",
     "jose": "^6.2.3",
     "jspdf": "^4.2.1",
     "leaflet": "^1.9.4",
     "next": "^15.3.3",
+    "pg": "^8.21.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-leaflet": "^4.2.1"
+    "react-leaflet": "^4.2.1",
+    "typeorm": "^1.0.0"
   },
   "devDependencies": {
+    "@types/pg": "^8.20.0",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
     "eslint": "^9.13.0",
-    "eslint-config-next": "^15.3.3"
+    "eslint-config-next": "^15.3.3",
+    "jest": "^30.4.2",
+    "jest-environment-node": "^30.4.1",
+    "node-fetch": "^2.7.0",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.22.4",
+    "xlsx": "^0.18.5"
   }
 }

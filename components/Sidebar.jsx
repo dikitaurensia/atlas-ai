@@ -2,14 +2,17 @@
 
 import CategoryPicker from './CategoryPicker'
 import RadiusSlider from './RadiusSlider'
+import ScalePicker from './ScalePicker'
 import ResultPanel from './ResultPanel'
 import EmptyState from './EmptyState'
+import LoadingSteps from './LoadingSteps'
 
 export default function Sidebar({
   selectedCategory, onCategoryChange,
   radius, onRadiusChange,
-  onAnalyze, canAnalyze, isAnalyzing,
-  analysisResult, onSave, isSaved, selectedLocation,
+  scale, onScaleChange,
+  onAnalyze, isAnalyzing,
+  analysisResult, analysisError, onSave, isSaved, selectedLocation,
 }) {
   return (
     <aside style={s.sidebar}>
@@ -17,35 +20,15 @@ export default function Sidebar({
       <div style={s.controls}>
         <CategoryPicker selected={selectedCategory} onChange={onCategoryChange} />
         <div style={s.divider} />
-        <RadiusSlider value={radius} onChange={onRadiusChange} />
-        <div style={s.analyzeBtnWrap}>
-          <button
-            style={{ ...s.analyzeBtn, ...(!canAnalyze || isAnalyzing ? s.analyzeBtnDisabled : {}) }}
-            onClick={onAnalyze}
-            disabled={!canAnalyze || isAnalyzing}
-          >
-            {isAnalyzing ? (
-              <>
-                <span style={s.analyzeBtnSpinner} />
-                Menganalisis…
-              </>
-            ) : (
-              <>
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                  <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
-                </svg>
-                {!selectedLocation ? 'Pilih lokasi di peta' : !selectedCategory ? 'Pilih kategori' : 'Mulai Analisis'}
-              </>
-            )}
-          </button>
-        </div>
+        <ScalePicker selected={scale} onChange={onScaleChange} />
         <div style={s.divider} />
+        <RadiusSlider value={radius} onChange={onRadiusChange} />
       </div>
 
       {/* Result / state area */}
       <div style={s.resultArea}>
         {isAnalyzing ? (
-          <LoadingState category={selectedCategory} />
+          <LoadingSteps category={selectedCategory} />
         ) : analysisResult ? (
           <ResultPanel
             result={analysisResult}
@@ -54,8 +37,20 @@ export default function Sidebar({
             category={selectedCategory}
             location={selectedLocation}
           />
+        ) : analysisError ? (
+          // AC1.7: tampilkan error dengan tombol Coba Lagi
+          <div style={s.errorWrap}>
+            <div style={s.errorIcon}>
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01"/>
+              </svg>
+            </div>
+            <p style={s.errorTitle}>Analisis Gagal</p>
+            <p style={s.errorDesc}>Terjadi kesalahan saat memproses analisis. Periksa koneksi internet Anda dan coba lagi.</p>
+            <button style={s.retryBtn} onClick={onAnalyze}>Coba Lagi</button>
+          </div>
         ) : (
-          <EmptyState selectedCategory={selectedCategory} />
+          <EmptyState selectedCategory={selectedCategory} selectedLocation={selectedLocation} onAnalyze={onAnalyze} />
         )}
       </div>
 
@@ -69,27 +64,6 @@ export default function Sidebar({
   )
 }
 
-function LoadingState({ category }) {
-  return (
-    <div style={s.loading}>
-      <div style={s.pulseRing}>
-        <div style={s.pulseCore} />
-      </div>
-      <p style={s.loadingTitle}>Menganalisis lokasi…</p>
-      <p style={s.loadingDesc}>
-        {category ? `Memproses data ${category} & kompetitor` : 'Memproses data geospasial'}
-      </p>
-      <div style={s.loadingSteps}>
-        {['Overpass API (OSM)', 'Neon PostgreSQL', 'BPS 2020 Demographics'].map((step, i) => (
-          <div key={step} style={{ ...s.loadingStep, animationDelay: `${i * 0.3}s` }}>
-            <div style={s.loadingDot} />
-            <span style={s.loadingStepText}>{step}</span>
-          </div>
-        ))}
-      </div>
-    </div>
-  )
-}
 
 const s = {
   sidebar: {
@@ -114,58 +88,19 @@ const s = {
   footerText: { fontSize: 9, color: 'var(--txt-3)', letterSpacing: '0.3px' },
   footerDot: { fontSize: 9, color: 'var(--txt-3)' },
 
-  analyzeBtnWrap: { padding: '10px 14px 12px' },
-  analyzeBtn: {
-    width: '100%', padding: '10px', border: 'none',
-    borderRadius: 8, cursor: 'pointer',
-    background: 'var(--cta)',
-    boxShadow: '0 4px 14px rgba(6,182,212,0.3)',
-    color: '#fff', fontSize: 12, fontWeight: 700,
-    fontFamily: 'inherit',
-    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-    transition: 'all 0.15s',
-  },
-  analyzeBtnDisabled: {
-    background: 'var(--sb-card)',
-    color: 'var(--txt-3)',
-    boxShadow: 'none',
-    cursor: 'not-allowed',
-  },
-  analyzeBtnSpinner: {
-    width: 12, height: 12, borderRadius: '50%',
-    border: '2px solid rgba(255,255,255,0.3)',
-    borderTopColor: '#fff',
-    animation: 'spin 0.7s linear infinite',
-    display: 'inline-block', flexShrink: 0,
-  },
-
-  loading: {
+  errorWrap: {
     flex: 1, display: 'flex', flexDirection: 'column',
     alignItems: 'center', justifyContent: 'center',
-    padding: '24px 20px', gap: 10,
+    padding: '28px 20px', textAlign: 'center', gap: 10,
   },
-  pulseRing: {
-    width: 52, height: 52, borderRadius: '50%',
-    border: '2px solid rgba(6,182,212,0.2)',
-    display: 'flex', alignItems: 'center', justifyContent: 'center',
-    animation: 'pulse-ring 1.5s ease-out infinite',
+  errorIcon: { color: '#EF4444', marginBottom: 4 },
+  errorTitle: { fontSize: 13, fontWeight: 700, color: 'var(--txt-1)', margin: 0 },
+  errorDesc: { fontSize: 11, color: 'var(--txt-2)', lineHeight: 1.6, margin: 0 },
+  retryBtn: {
+    marginTop: 4, padding: '8px 18px',
+    background: 'var(--cta)', color: '#fff',
+    border: 'none', borderRadius: 8,
+    fontSize: 11, fontWeight: 700,
+    cursor: 'pointer', fontFamily: 'inherit',
   },
-  pulseCore: {
-    width: 20, height: 20, borderRadius: '50%',
-    background: 'var(--accent)',
-    boxShadow: '0 0 12px rgba(6,182,212,0.35)',
-  },
-  loadingTitle: { fontSize: 12, fontWeight: 700, color: 'var(--txt-1)' },
-  loadingDesc: { fontSize: 10, color: 'var(--txt-3)', textAlign: 'center', marginTop: -4 },
-  loadingSteps: { display: 'flex', flexDirection: 'column', gap: 5, marginTop: 4 },
-  loadingStep: {
-    display: 'flex', alignItems: 'center', gap: 7,
-    animation: 'fade-in 0.5s ease forwards',
-    opacity: 0,
-  },
-  loadingDot: {
-    width: 5, height: 5, borderRadius: '50%',
-    background: 'var(--accent)', opacity: 0.7,
-  },
-  loadingStepText: { fontSize: 10, color: 'var(--txt-3)' },
 }

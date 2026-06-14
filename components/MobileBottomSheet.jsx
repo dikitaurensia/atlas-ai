@@ -3,8 +3,10 @@
 import { useState, useRef, useEffect } from 'react'
 import CategoryPicker from './CategoryPicker'
 import RadiusSlider from './RadiusSlider'
+import ScalePicker from './ScalePicker'
 import ResultPanel from './ResultPanel'
 import EmptyState from './EmptyState'
+import LoadingSteps from './LoadingSteps'
 
 const PEEK_H = 230   // collapsed: just categories + radius
 const FULL_H = 0.86  // expanded: 86% of viewport height
@@ -12,6 +14,7 @@ const FULL_H = 0.86  // expanded: 86% of viewport height
 export default function MobileBottomSheet({
   selectedCategory, onCategoryChange,
   radius, onRadiusChange,
+  scale, onScaleChange,
   onAnalyze, canAnalyze, isAnalyzing,
   analysisResult, onSave, isSaved, selectedLocation,
 }) {
@@ -91,32 +94,13 @@ export default function MobileBottomSheet({
       <div className="sidebar-scroll" style={s.content}>
         <CategoryPicker selected={selectedCategory} onChange={onCategoryChange} />
         <div style={s.divider} />
+        <ScalePicker selected={scale} onChange={onScaleChange} />
+        <div style={s.divider} />
         <RadiusSlider value={radius} onChange={onRadiusChange} />
-        <div style={s.analyzeBtnWrap}>
-          <button
-            style={{ ...s.analyzeBtn, ...(!canAnalyze || isAnalyzing ? s.analyzeBtnDisabled : {}) }}
-            onClick={onAnalyze}
-            disabled={!canAnalyze || isAnalyzing}
-          >
-            {isAnalyzing ? (
-              <>
-                <span style={s.analyzeBtnSpinner} />
-                Menganalisis…
-              </>
-            ) : (
-              <>
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                  <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
-                </svg>
-                {!selectedLocation ? 'Pilih lokasi di peta' : !selectedCategory ? 'Pilih kategori' : 'Mulai Analisis'}
-              </>
-            )}
-          </button>
-        </div>
         <div style={s.divider} />
 
         {isAnalyzing ? (
-          <LoadingState category={selectedCategory} />
+          <LoadingSteps category={selectedCategory} />
         ) : analysisResult ? (
           <ResultPanel
             result={analysisResult}
@@ -126,7 +110,7 @@ export default function MobileBottomSheet({
             location={selectedLocation}
           />
         ) : (
-          <EmptyState selectedCategory={selectedCategory} />
+          <EmptyState selectedCategory={selectedCategory} selectedLocation={selectedLocation} onAnalyze={onAnalyze} />
         )}
       </div>
 
@@ -138,15 +122,6 @@ export default function MobileBottomSheet({
   )
 }
 
-function LoadingState({ category }) {
-  return (
-    <div style={ls.wrap}>
-      <div style={ls.ring} />
-      <p style={ls.title}>Menganalisis lokasi…</p>
-      <p style={ls.sub}>{category ? `Memproses data ${category}` : 'Memproses data geospasial'}</p>
-    </div>
-  )
-}
 
 const s = {
   sheet: {
@@ -185,44 +160,5 @@ const s = {
   },
   footerText: { fontSize: 9, color: 'var(--txt-3)', letterSpacing: '0.3px' },
 
-  analyzeBtnWrap: { padding: '10px 14px 12px' },
-  analyzeBtn: {
-    width: '100%', padding: '11px', border: 'none',
-    borderRadius: 8, cursor: 'pointer',
-    background: 'var(--cta)',
-    boxShadow: '0 4px 14px rgba(6,182,212,0.3)',
-    color: '#fff', fontSize: 13, fontWeight: 700,
-    fontFamily: 'inherit',
-    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-    transition: 'all 0.15s',
-  },
-  analyzeBtnDisabled: {
-    background: 'var(--sb-card)',
-    color: 'var(--txt-3)',
-    boxShadow: 'none',
-    cursor: 'not-allowed',
-  },
-  analyzeBtnSpinner: {
-    width: 13, height: 13, borderRadius: '50%',
-    border: '2px solid rgba(255,255,255,0.3)',
-    borderTopColor: '#fff',
-    animation: 'spin 0.7s linear infinite',
-    display: 'inline-block', flexShrink: 0,
-  },
 }
 
-const ls = {
-  wrap: {
-    display: 'flex', flexDirection: 'column',
-    alignItems: 'center', justifyContent: 'center',
-    padding: '28px 20px', gap: 10,
-  },
-  ring: {
-    width: 40, height: 40, borderRadius: '50%',
-    border: '2px solid rgba(27,53,102,0.25)',
-    borderTopColor: 'var(--accent)',
-    animation: 'spin 0.8s linear infinite',
-  },
-  title: { fontSize: 13, fontWeight: 700, color: 'var(--txt-1)' },
-  sub: { fontSize: 11, color: 'var(--txt-3)', textAlign: 'center' },
-}

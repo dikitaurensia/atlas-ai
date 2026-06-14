@@ -28,6 +28,7 @@ function scoreColor(s) {
 export default function PDFPreviewModal({ open, onClose, result, category, location }) {
   const previewRef = useRef(null)
   const [downloading, setDownloading] = useState(false)
+  const [downloadError, setDownloadError] = useState(false)
   const isMobile = useIsMobile()
 
   if (!open || !result) return null
@@ -44,6 +45,7 @@ export default function PDFPreviewModal({ open, onClose, result, category, locat
   const handleDownload = async () => {
     if (!previewRef.current) return
     setDownloading(true)
+    setDownloadError(false)
     // Temporarily remove zoom for full-resolution capture
     const el = previewRef.current
     const prevZoom = el.style.zoom
@@ -60,8 +62,11 @@ export default function PDFPreviewModal({ open, onClose, result, category, locat
       const lng = location?.lng?.toFixed(4) ?? '0'
       const ds = new Date().toISOString().slice(0, 10).replace(/-/g, '')
       pdf.save(`ESB_AtlasAI_${(category ?? 'Analisis').replace(/\s/g, '')}_${ds}_${lat}_${lng}.pdf`)
+    } catch {
+      // AC3.4: tampilkan pesan error jika generasi PDF gagal
+      setDownloadError(true)
     } finally {
-      el.style.zoom = prevZoom // restore
+      el.style.zoom = prevZoom
       setDownloading(false)
     }
   }
@@ -93,6 +98,10 @@ export default function PDFPreviewModal({ open, onClose, result, category, locat
             </div>
           </div>
           <div style={s.chromeRight}>
+            {/* AC3.4: pesan error jika PDF gagal digenerate */}
+            {downloadError && (
+              <span style={s.dlError}>Gagal mengunduh laporan. Silakan coba lagi.</span>
+            )}
             <button
               style={{ ...s.dlBtn, ...(downloading ? s.dlBtnLoading : {}) }}
               onClick={handleDownload}
@@ -298,6 +307,12 @@ const s = {
     cursor: 'pointer', fontFamily: 'inherit',
   },
   dlBtnLoading: { background: 'rgba(27,53,102,0.5)', cursor: 'not-allowed' },
+  dlError: {
+    fontSize: 10, color: '#EF4444',
+    background: 'rgba(239,68,68,0.08)',
+    border: '1px solid rgba(239,68,68,0.2)',
+    borderRadius: 6, padding: '4px 8px',
+  },
   closeBtn: {
     width: 30, height: 30, borderRadius: 7,
     border: '1px solid var(--sb-border)', background: 'var(--sb-card)',

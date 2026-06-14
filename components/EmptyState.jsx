@@ -3,11 +3,12 @@
 const STEPS = [
   { n: 1, label: 'Pilih kategori bisnis' },
   { n: 2, label: 'Klik titik di peta' },
-  { n: 3, label: 'Baca skor & insight' },
+  { n: 3, label: 'Mulai Analisis' },
 ]
 
-export default function EmptyState({ selectedCategory }) {
-  const step = selectedCategory ? 2 : 1
+export default function EmptyState({ selectedCategory, selectedLocation, onAnalyze }) {
+  const step = !selectedCategory ? 1 : !selectedLocation ? 2 : 3
+  const ready = step === 3
 
   return (
     <div style={s.wrap}>
@@ -22,19 +23,35 @@ export default function EmptyState({ selectedCategory }) {
 
       <div style={s.steps}>
         {STEPS.map(st => {
-          const done = st.n < step
+          const done   = st.n < step
           const active = st.n === step
+          const isAction = st.n === 3 && ready
+
           return (
-            <div key={st.n} style={{ ...s.step, ...(active ? s.stepActive : {}) }}>
+            <div key={st.n} style={{
+              ...s.step,
+              ...(active && !isAction ? s.stepActive : {}),
+              ...(isAction ? s.stepAction : {}),
+            }}>
               <div style={{ ...s.stepNum, ...(done ? s.stepDone : active ? s.stepCurrent : {}) }}>
                 {done
                   ? <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12"/></svg>
                   : st.n
                 }
               </div>
-              <span style={{ ...s.stepLabel, ...(done ? s.stepLabelDone : active ? s.stepLabelActive : {}) }}>
-                {st.label}
-              </span>
+
+              {isAction ? (
+                <button style={s.analyzeBtn} onClick={onAnalyze}>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+                  </svg>
+                  Mulai Analisis
+                </button>
+              ) : (
+                <span style={{ ...s.stepLabel, ...(done ? s.stepLabelDone : active ? s.stepLabelActive : {}) }}>
+                  {st.label}
+                </span>
+              )}
             </div>
           )
         })}
@@ -85,6 +102,11 @@ const s = {
   stepActive: {
     background: 'var(--accent-bg)', border: '1px solid var(--accent-bd)',
   },
+  stepAction: {
+    background: 'linear-gradient(135deg, rgba(6,182,212,0.12) 0%, rgba(14,165,233,0.07) 100%)',
+    border: '1px solid rgba(6,182,212,0.3)',
+    animation: 'fade-in 0.4s ease',
+  },
   stepNum: {
     width: 20, height: 20, borderRadius: '50%', flexShrink: 0,
     display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -96,4 +118,11 @@ const s = {
   stepLabel: { fontSize: 11, color: 'var(--txt-3)', fontWeight: 500, textAlign: 'left' },
   stepLabelDone: { color: 'var(--txt-2)' },
   stepLabelActive: { color: 'var(--txt-1)', fontWeight: 600 },
+  analyzeBtn: {
+    flex: 1, display: 'flex', alignItems: 'center', gap: 6,
+    padding: '4px 0', background: 'none', border: 'none',
+    cursor: 'pointer', fontFamily: 'inherit',
+    fontSize: 12, fontWeight: 700, color: 'var(--accent)',
+    textAlign: 'left',
+  },
 }

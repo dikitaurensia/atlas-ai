@@ -1,27 +1,24 @@
+import { cookies } from 'next/headers'
+import { verifyToken, COOKIE } from '@/lib/auth'
 import { generateAnalysis } from '@/lib/analysis'
-import sql from '@/lib/db'
+import { getDataSource } from '@/lib/data-source'
 
-// Count transport infrastructure nodes via Overpass — proxy for accessibility
+const VALID_CATEGORIES = ['Ayam Goreng', 'Kopi & Cafe', 'Mie & Bakso', 'Minuman', 'Burger', 'Lainnya']
+const VALID_SCALES    = ['Kecil', 'Menengah', 'Besar']
+
 async function fetchAccessibilityScore(lat, lng, radius) {
   try {
     const q = `[out:json][timeout:10];(node["highway"="bus_stop"](around:${radius},${lat},${lng});node["railway"~"station|halt|tram_stop|subway_entrance"](around:${radius},${lat},${lng});node["amenity"~"bus_station|taxi"](around:${radius},${lat},${lng}););out count;`
-
     const res = await fetch(
       `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(q)}`,
       {
-        headers: {
-          'Accept': '*/*',
-          'User-Agent': 'AtlasAI/1.0 (FnB location intelligence; contact: atlas@esb.co.id)',
-        },
+        headers: { 'Accept': '*/*', 'User-Agent': 'AtlasAI/1.0 (FnB location intelligence; contact: atlas@esb.co.id)' },
         signal: AbortSignal.timeout(12000),
       }
     )
     if (!res.ok) return null
-
     const data = await res.json()
     const total = parseInt(data.elements?.[0]?.tags?.total || '0', 10)
-
-    // 0 nodes → 20 (isolated), 10 → 55, 20 → 90, 22+ → 95
     const score = Math.min(95, Math.max(20, Math.round(20 + total * 3.5)))
     return { score, transportCount: total }
   } catch {
@@ -29,27 +26,19 @@ async function fetchAccessibilityScore(lat, lng, radius) {
   }
 }
 
-// Count FnB + retail + office amenities via Overpass — proxy for foot traffic
 async function fetchFootTrafficScore(lat, lng, radius) {
   try {
     const q = `[out:json][timeout:12];(node["amenity"~"restaurant|cafe|fast_food|bar|food_court|bank|atm"](around:${radius},${lat},${lng});node["shop"~"mall|supermarket|convenience|clothes|electronics"](around:${radius},${lat},${lng});node["office"](around:${radius},${lat},${lng}););out count;`
-
     const res = await fetch(
       `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(q)}`,
       {
-        headers: {
-          'Accept': '*/*',
-          'User-Agent': 'AtlasAI/1.0 (FnB location intelligence; contact: atlas@esb.co.id)',
-        },
+        headers: { 'Accept': '*/*', 'User-Agent': 'AtlasAI/1.0 (FnB location intelligence; contact: atlas@esb.co.id)' },
         signal: AbortSignal.timeout(14000),
       }
     )
     if (!res.ok) return null
-
     const data = await res.json()
     const total = parseInt(data.elements?.[0]?.tags?.total || '0', 10)
-
-    // 0 → 20, 20 → 39, 50 → 68, 80+ → 95
     const score = Math.min(95, Math.max(20, Math.round(20 + total * 0.95)))
     return { score, amenityCount: total }
   } catch {
@@ -57,7 +46,7 @@ async function fetchFootTrafficScore(lat, lng, radius) {
   }
 }
 
-async function fetchDBData(lat, lng, category, radius) {
+async function fetchDBData(dataSource, lat, lng, category, radius) {
   const radiusLat = radius / 111320.0
   const radiusLng = radius / (111320.0 * Math.cos(lat * Math.PI / 180))
   const latMin = lat - radiusLat
@@ -65,85 +54,130 @@ async function fetchDBData(lat, lng, category, radius) {
   const lngMin = lng - radiusLng
   const lngMax = lng + radiusLng
 
-  const [rows, benchmarkRows, demoRows] = await Promise.all([
-    sql`
-      SELECT * FROM (
-        SELECT id, name, lat, lng, address, revenue_min_jt, revenue_max_jt,
-          6371000 * acos(
-            LEAST(1.0,
-              cos(radians(${lat})) * cos(radians(lat)) *
-              cos(radians(lng) - radians(${lng})) +
-              sin(radians(${lat})) * sin(radians(lat))
-            )
-          ) AS distance_m
-        FROM competitors
-        WHERE category = ${category}
-          AND lat BETWEEN ${latMin} AND ${latMax}
-          AND lng BETWEEN ${lngMin} AND ${lngMax}
-      ) sub
-      WHERE distance_m <= ${radius}
-      ORDER BY distance_m
-    `,
-    sql`SELECT * FROM profit_benchmarks WHERE category = ${category} LIMIT 1`,
-    sql`
-      SELECT name, population_density, income_index, area_type
-      FROM area_demographics
-      WHERE lat_min <= ${lat} AND ${lat} <= lat_max
-        AND lng_min <= ${lng} AND ${lng} <= lng_max
-      ORDER BY (lat_max - lat_min) * (lng_max - lng_min) ASC
-      LIMIT 1
-    `,
+  const [competitors, benchmarks, demographics] = await Promise.all([
+    dataSource.query(
+      `SELECT * FROM (
+         SELECT id, name, lat, lng, address, revenue_min_jt, revenue_max_jt,
+           6371000 * acos(
+             LEAST(1.0,
+               cos(radians($1)) * cos(radians(lat)) *
+               cos(radians(lng) - radians($2)) +
+               sin(radians($1)) * sin(radians(lat))
+             )
+           ) AS distance_m
+         FROM competitors
+         WHERE category = $3
+           AND lat BETWEEN $4 AND $5
+           AND lng BETWEEN $6 AND $7
+       ) sub
+       WHERE distance_m <= $8
+       ORDER BY distance_m`,
+      [lat, lng, category, latMin, latMax, lngMin, lngMax, radius]
+    ),
+    dataSource.query(
+      `SELECT * FROM profit_benchmarks WHERE category = $1 LIMIT 1`,
+      [category]
+    ),
+    dataSource.query(
+      `SELECT name, population_density, income_index, area_type
+       FROM area_demographics
+       WHERE lat_min <= $1 AND $1 <= lat_max
+         AND lng_min <= $2 AND $2 <= lng_max
+       ORDER BY (lat_max - lat_min) * (lng_max - lng_min) ASC
+       LIMIT 1`,
+      [lat, lng]
+    ),
   ])
 
   return {
-    competitors: rows,
-    benchmark: benchmarkRows[0] || null,
-    demographics: demoRows[0] || null,
+    competitors,
+    benchmark: benchmarks[0] || null,
+    demographics: demographics[0] || null,
   }
 }
 
 export async function POST(request) {
-  const { lat, lng, category, radius } = await request.json()
+  // BUG-001: Auth guard — endpoint tidak boleh publik
+  const token = (await cookies()).get(COOKIE)?.value
+  if (!token) return Response.json({ error: 'Unauthorized' }, { status: 401 })
+  try { await verifyToken(token) } catch { return Response.json({ error: 'Unauthorized' }, { status: 401 }) }
 
-  // All 3 data sources run in parallel
-  const [dbResult, trafficResult, accessibilityResult] = await Promise.allSettled([
-    fetchDBData(lat, lng, category, radius),
-    fetchFootTrafficScore(lat, lng, radius),
-    fetchAccessibilityScore(lat, lng, radius),
-  ])
+  // BUG-005: Seluruh handler dibungkus try/catch
+  try {
+    // BUG-002: Validasi input sebelum menyentuh DB
+    let body
+    try { body = await request.json() } catch {
+      return Response.json({ error: 'Request body tidak valid' }, { status: 400 })
+    }
 
-  let nearbyCompetitors = []
-  let benchmark = null
-  let demographics = null
+    const { lat, lng, category, radius, scale = 'Menengah' } = body
 
-  if (dbResult.status === 'fulfilled') {
-    nearbyCompetitors = dbResult.value.competitors
-    benchmark = dbResult.value.benchmark
-    demographics = dbResult.value.demographics
-  } else {
-    console.error('[analyze] DB error:', dbResult.reason?.message)
-    try {
-      nearbyCompetitors = await sql`
-        SELECT id, name, lat, lng, address, 0 AS distance_m
-        FROM competitors WHERE category = ${category} LIMIT 5
-      `
-    } catch { /* stay empty */ }
+    if (lat == null || lng == null || !category || radius == null) {
+      return Response.json({ error: 'lat, lng, category, dan radius wajib diisi' }, { status: 400 })
+    }
+    if (typeof lat !== 'number' || typeof lng !== 'number' || !isFinite(lat) || !isFinite(lng)) {
+      return Response.json({ error: 'lat dan lng harus berupa angka' }, { status: 400 })
+    }
+    if (lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+      return Response.json({ error: 'Koordinat tidak valid' }, { status: 400 })
+    }
+    if (!VALID_CATEGORIES.includes(category)) {
+      return Response.json({ error: 'Kategori tidak valid' }, { status: 400 })
+    }
+    // BUG-011: Radius harus dalam rentang 200–1500 m
+    const r = Number(radius)
+    if (!Number.isFinite(r) || r < 200 || r > 1500) {
+      return Response.json({ error: 'Radius harus antara 200 dan 1500 meter' }, { status: 400 })
+    }
+    if (!VALID_SCALES.includes(scale)) {
+      return Response.json({ error: 'Skala tidak valid' }, { status: 400 })
+    }
+
+    const dataSource = await getDataSource()
+
+    const [dbResult, trafficResult, accessibilityResult] = await Promise.allSettled([
+      fetchDBData(dataSource, lat, lng, category, r),
+      fetchFootTrafficScore(lat, lng, r),
+      fetchAccessibilityScore(lat, lng, r),
+    ])
+
+    let nearbyCompetitors = []
+    let benchmark = null
+    let demographics = null
+
+    if (dbResult.status === 'fulfilled') {
+      nearbyCompetitors = dbResult.value.competitors
+      benchmark = dbResult.value.benchmark
+      demographics = dbResult.value.demographics
+    } else {
+      console.error('[analyze] DB error:', dbResult.reason?.message)
+      try {
+        nearbyCompetitors = await dataSource.query(
+          `SELECT id, name, lat, lng, address, 0 AS distance_m FROM competitors WHERE category = $1 LIMIT 5`,
+          [category]
+        )
+      } catch { /* stay empty */ }
+    }
+
+    const footTraffic    = trafficResult.status === 'fulfilled'      ? trafficResult.value      : null
+    const accessibility  = accessibilityResult.status === 'fulfilled' ? accessibilityResult.value : null
+
+    if (!demographics) {
+      return Response.json({
+        unsupported: true,
+        message: 'Area ini berada di luar cakupan AtlasAI. Saat ini kami mendukung analisis untuk wilayah DKI Jakarta.',
+      })
+    }
+
+    const result = generateAnalysis(
+      { lat, lng }, category, r,
+      { nearbyCompetitors, benchmark, footTraffic, accessibility, demographics },
+      scale
+    )
+    return Response.json(result)
+
+  } catch (err) {
+    console.error('[analyze]', err)
+    return Response.json({ error: 'Terjadi kesalahan server' }, { status: 500 })
   }
-
-  const footTraffic = trafficResult.status === 'fulfilled' ? trafficResult.value : null
-  const accessibility = accessibilityResult.status === 'fulfilled' ? accessibilityResult.value : null
-
-  // Area di luar cakupan demografis → tidak didukung
-  if (!demographics) {
-    return Response.json({
-      unsupported: true,
-      message: 'Area ini berada di luar cakupan AtlasAI. Saat ini kami mendukung analisis untuk wilayah DKI Jakarta.',
-    })
-  }
-
-  const result = generateAnalysis(
-    { lat, lng }, category, radius,
-    { nearbyCompetitors, benchmark, footTraffic, accessibility, demographics }
-  )
-  return Response.json(result)
 }

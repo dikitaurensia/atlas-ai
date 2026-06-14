@@ -96,9 +96,24 @@ export default function ResultPanel({ result, onSave, isSaved, category, locatio
         <div style={s.profitCard}>
           <div style={s.profitTop}>
             <span style={s.cardLabel}>ESTIMASI PROFIT / BULAN</span>
-            <span style={s.profitBadge}>ESB Data</span>
+            <div style={{ display: 'flex', gap: 5, alignItems: 'center' }}>
+              {result.scale && <span style={s.scaleBadge}>Skala {result.scale}</span>}
+              <span style={s.profitBadge}>ESB Data</span>
+            </div>
           </div>
-          <div style={s.profitRange}>
+          {/* AC2.3: warning data terbatas */}
+          {result.lowReferenceData && (
+            <div style={s.profitWarning}>
+              ⚠ Data terbatas (&lt; 5 outlet referensi). Estimasi bersifat indikatif.
+            </div>
+          )}
+          {/* AC2.5: warning volatilitas tinggi */}
+          {result.highVariance && (
+            <div style={s.profitWarning}>
+              ⚠ Volatilitas data tinggi — estimasi memiliki tingkat ketidakpastian lebih besar.
+            </div>
+          )}
+          <div style={{ ...s.profitRange, ...(result.lowReferenceData ? s.profitRangeMuted : {}) }}>
             Rp {result.profitMin} jt
             <span style={s.profitSep}> – </span>
             Rp {result.profitMax} jt
@@ -248,7 +263,20 @@ const s = {
     background: 'rgba(6,182,212,0.12)', padding: '2px 7px',
     borderRadius: 4, border: '1px solid rgba(6,182,212,0.25)',
   },
+  scaleBadge: {
+    fontSize: 8, fontWeight: 700, color: '#A78BFA',
+    background: 'rgba(139,92,246,0.12)', padding: '2px 7px',
+    borderRadius: 4, border: '1px solid rgba(139,92,246,0.25)',
+  },
+  profitWarning: {
+    fontSize: 9.5, color: '#D97706',
+    background: 'rgba(245,158,11,0.08)',
+    border: '1px solid rgba(245,158,11,0.2)',
+    borderRadius: 5, padding: '4px 8px',
+    marginBottom: 6,
+  },
   profitRange: { fontSize: 22, fontWeight: 800, color: '#67E8F9', marginBottom: 4, lineHeight: 1 },
+  profitRangeMuted: { color: '#94A3B8', fontSize: 18 },
   profitSep: { color: '#06B6D4', fontWeight: 400 },
   profitNote: { fontSize: 9.5, color: 'var(--txt-3)' },
 

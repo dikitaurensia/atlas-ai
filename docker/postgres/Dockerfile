@@ -1,0 +1,7 @@
+FROM postgres:16-alpine
+
+ENV POSTGRES_USER=atlas
+ENV POSTGRES_PASSWORD=atlas_dev
+ENV POSTGRES_DB=atlas_ai
+
+EXPOSE 5432

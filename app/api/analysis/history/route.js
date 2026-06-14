@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { verifyToken, COOKIE } from '@/lib/auth'
-import sql from '@/lib/db'
+import { getDataSource } from '@/lib/data-source'
+import { SavedAnalysisSchema } from '@/lib/entities/SavedAnalysisSchema'
 
 export async function GET() {
   const token = (await cookies()).get(COOKIE)?.value
@@ -12,13 +13,14 @@ export async function GET() {
     return NextResponse.json({ items: [] }, { status: 401 })
   }
 
-  const rows = await sql`
-    SELECT id, location, category, lat, lng, radius, overall, grade, result_json, created_at
-    FROM saved_analyses
-    WHERE user_id = ${payload.userId}
-    ORDER BY created_at DESC
-    LIMIT 100
-  `
+  const dataSource = await getDataSource()
+  const repo = dataSource.getRepository(SavedAnalysisSchema)
 
-  return NextResponse.json({ items: rows })
+  const items = await repo.find({
+    where: { user_id: payload.userId },
+    order: { created_at: 'DESC' },
+    take: 100,
+  })
+
+  return NextResponse.json({ items })
 }

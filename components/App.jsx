@@ -15,15 +15,22 @@ function formatDate(iso) {
     ', ' + d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }).replace(':', '.')
 }
 
+let _tempSeq = 0
+function tempId() { return `tmp-${++_tempSeq}` }
+
 export default function App() {
   const [selectedCategory, setSelectedCategory] = useState(null)
   const [selectedLocation, setSelectedLocation] = useState(null)
   const [radius, setRadius] = useState(500)
+  const [scale, setScale] = useState('Menengah')
   const [analysisResult, setAnalysisResult] = useState(null)
+  const [analysisError, setAnalysisError] = useState(false)
   const [isAnalyzing, setIsAnalyzing] = useState(false)
   const [riwayatOpen, setRiwayatOpen] = useState(false)
   const [historyItems, setHistoryItems] = useState([])
   const [savedKey, setSavedKey] = useState(null)
+  // id of the unsaved temp entry for the current analysis (null if saved or no analysis yet)
+  const sessionIdRef = useRef(null)
   const abortRef = useRef(null)
 
   useEffect(() => {
@@ -41,11 +48,13 @@ export default function App() {
           saved: true,
           lat: h.lat,
           lng: h.lng,
+          radius: h.radius,
           result: h.result_json,
         })))
       })
       .catch(() => {})
   }, [])
+
   const isMobile = useIsMobile()
 
   const runAnalysis = async (latlng, category, r) => {
@@ -54,20 +63,47 @@ export default function App() {
     abortRef.current = controller
     setIsAnalyzing(true)
     setAnalysisResult(null)
+    setAnalysisError(false)
     setSavedKey(null)
+    sessionIdRef.current = null
 
     try {
       const res = await fetch('/api/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ lat: latlng.lat, lng: latlng.lng, category, radius: r }),
+        body: JSON.stringify({ lat: latlng.lat, lng: latlng.lng, category, radius: r, scale }),
         signal: controller.signal,
       })
       if (controller.signal.aborted) return
       if (!res.ok) throw new Error('Analysis failed')
-      setAnalysisResult(await res.json())
+      const data = await res.json()
+      setAnalysisResult(data)
+
+      // Auto-add every completed (non-unsupported) analysis to session history
+      if (!data.unsupported && data.overall != null) {
+        const sid = tempId()
+        sessionIdRef.current = sid
+        const locationName = getAreaName(latlng)
+        setHistoryItems(prev => [{
+          id: sid,
+          location: locationName,
+          category,
+          score: data.overall,
+          grade: data.grade,
+          date: formatDate(new Date().toISOString()),
+          saved: false,
+          lat: latlng.lat,
+          lng: latlng.lng,
+          radius: r,
+          result: data,
+        }, ...prev])
+      }
     } catch (err) {
-      if (err.name !== 'AbortError') console.error(err)
+      if (err.name !== 'AbortError') {
+        console.error(err)
+        // AC1.7: tampilkan state error agar UI bisa menampilkan tombol "Coba Lagi"
+        if (!controller.signal.aborted) setAnalysisError(true)
+      }
     } finally {
       if (!controller.signal.aborted) setIsAnalyzing(false)
     }
@@ -76,6 +112,7 @@ export default function App() {
   const handleLocationSelect = (latlng) => {
     setSelectedLocation(latlng)
     setAnalysisResult(null)
+    setAnalysisError(false)
     setSavedKey(null)
   }
 
@@ -87,6 +124,7 @@ export default function App() {
   const handleCategoryChange = (cat) => {
     setSelectedCategory(cat)
     setAnalysisResult(null)
+    setAnalysisError(false)
     setSavedKey(null)
   }
 
@@ -94,16 +132,22 @@ export default function App() {
     if (!analysisResult || !selectedLocation || !selectedCategory) return
 
     if (savedKey) {
+      // Unsave: remove from DB, mark entry as saved:false in local list
       await fetch('/api/analysis/save', {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: savedKey }),
       })
-      setHistoryItems(prev => prev.filter(h => h.id !== savedKey))
+      const sid = tempId()
+      sessionIdRef.current = sid
+      setHistoryItems(prev => prev.map(h =>
+        h.id === savedKey ? { ...h, id: sid, saved: false } : h
+      ))
       setSavedKey(null)
       return
     }
 
+    // Save: persist to DB, then update the session temp entry in place
     const locationName = getAreaName(selectedLocation)
     const res = await fetch('/api/analysis/save', {
       method: 'POST',
@@ -118,21 +162,32 @@ export default function App() {
       }),
     })
     const { id, created_at } = await res.json()
+    const sid = sessionIdRef.current
 
-    const newItem = {
-      id,
-      location: locationName,
-      category: selectedCategory,
-      score: analysisResult.overall,
-      grade: analysisResult.grade,
-      date: formatDate(created_at),
-      saved: true,
-      lat: selectedLocation.lat,
-      lng: selectedLocation.lng,
-      result: analysisResult,
-    }
-
-    setHistoryItems(prev => [newItem, ...prev])
+    setHistoryItems(prev => {
+      // If the temp entry exists, upgrade it in place
+      if (sid && prev.find(h => h.id === sid)) {
+        return prev.map(h => h.id === sid
+          ? { ...h, id, saved: true, date: formatDate(created_at) }
+          : h
+        )
+      }
+      // Fallback: prepend new saved entry
+      return [{
+        id,
+        location: locationName,
+        category: selectedCategory,
+        score: analysisResult.overall,
+        grade: analysisResult.grade,
+        date: formatDate(created_at),
+        saved: true,
+        lat: selectedLocation.lat,
+        lng: selectedLocation.lng,
+        radius,
+        result: analysisResult,
+      }, ...prev]
+    })
+    sessionIdRef.current = id
     setSavedKey(id)
   }
 
@@ -148,7 +203,7 @@ export default function App() {
     const latlng = { lat: item.lat, lng: item.lng }
     setSelectedLocation(latlng)
     setSelectedCategory(item.category)
-    setSavedKey(item.id)
+    setSavedKey(item.saved ? item.id : null)
     setAnalysisResult(item.result)
     setRiwayatOpen(false)
   }
@@ -189,10 +244,13 @@ export default function App() {
           onCategoryChange={handleCategoryChange}
           radius={radius}
           onRadiusChange={setRadius}
+          scale={scale}
+          onScaleChange={setScale}
           onAnalyze={handleAnalyze}
           canAnalyze={!!selectedCategory && !!selectedLocation}
           isAnalyzing={isAnalyzing}
           analysisResult={analysisResult}
+          analysisError={analysisError}
           onSave={handleSave}
           isSaved={!!savedKey}
           selectedLocation={selectedLocation}
@@ -215,10 +273,13 @@ export default function App() {
           onCategoryChange={handleCategoryChange}
           radius={radius}
           onRadiusChange={setRadius}
+          scale={scale}
+          onScaleChange={setScale}
           onAnalyze={handleAnalyze}
           canAnalyze={!!selectedCategory && !!selectedLocation}
           isAnalyzing={isAnalyzing}
           analysisResult={analysisResult}
+          analysisError={analysisError}
           onSave={handleSave}
           isSaved={!!savedKey}
           selectedLocation={selectedLocation}
