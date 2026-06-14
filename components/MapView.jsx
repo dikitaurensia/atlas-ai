@@ -137,7 +137,7 @@ export default function MapView({ selectedLocation, onLocationSelect, radius, an
           </>
         )}
 
-        {analysisResult?.competitors.map((c, i) => (
+        {analysisResult?.competitors?.map((c, i) => (
           <Marker key={c.id} position={[c.lat, c.lng]} icon={competitorIcon(i)}>
             <Popup>
               <div style={popupStyle}>
