@@ -16,33 +16,41 @@ export async function POST(request) {
     const lngMin = lng - radiusLng
     const lngMax = lng + radiusLng
 
-    const rows = await sql`
-      SELECT * FROM (
-        SELECT id, name, lat, lng, address,
-          6371000 * acos(
-            LEAST(1.0,
-              cos(radians(${lat})) * cos(radians(lat)) *
-              cos(radians(lng) - radians(${lng})) +
-              sin(radians(${lat})) * sin(radians(lat))
-            )
-          ) AS distance_m
-        FROM competitors
-        WHERE category = ${category}
-          AND lat BETWEEN ${latMin} AND ${latMax}
-          AND lng BETWEEN ${lngMin} AND ${lngMax}
-      ) sub
-      WHERE distance_m <= ${radius}
-      ORDER BY distance_m
-    `
+    const [rows, benchmarkRows] = await Promise.all([
+      sql`
+        SELECT * FROM (
+          SELECT id, name, lat, lng, address,
+            6371000 * acos(
+              LEAST(1.0,
+                cos(radians(${lat})) * cos(radians(lat)) *
+                cos(radians(lng) - radians(${lng})) +
+                sin(radians(${lat})) * sin(radians(lat))
+              )
+            ) AS distance_m
+          FROM competitors
+          WHERE category = ${category}
+            AND lat BETWEEN ${latMin} AND ${latMax}
+            AND lng BETWEEN ${lngMin} AND ${lngMax}
+        ) sub
+        WHERE distance_m <= ${radius}
+        ORDER BY distance_m
+      `,
+      sql`SELECT * FROM profit_benchmarks WHERE category = ${category} LIMIT 1`,
+    ])
 
-    const benchmarkRows = await sql`
-      SELECT * FROM profit_benchmarks WHERE category = ${category} LIMIT 1
-    `
-
-    nearbyCompetitors = rows
+    nearbyCompetitors = rows          // empty array = no competitors in radius (valid)
     benchmark = benchmarkRows[0] || null
   } catch (err) {
-    console.error('[analyze] DB error, using mock data:', err.message)
+    console.error('[analyze] DB error:', err.message)
+    // DB unavailable — try minimal fallback query
+    try {
+      nearbyCompetitors = await sql`
+        SELECT id, name, lat, lng, address, 0 AS distance_m
+        FROM competitors WHERE category = ${category} LIMIT 5
+      `
+    } catch {
+      nearbyCompetitors = []
+    }
   }
 
   const result = generateAnalysis({ lat, lng }, category, radius, { nearbyCompetitors, benchmark })
