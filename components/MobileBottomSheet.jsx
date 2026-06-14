@@ -151,7 +151,7 @@ function LoadingState({ category }) {
 const s = {
   sheet: {
     position: 'fixed', left: 0, right: 0, bottom: 0,
-    zIndex: 500,
+    zIndex: 1000,
     background: 'var(--sb-surface)',
     borderTop: '1px solid var(--sb-border)',
     borderRadius: '16px 16px 0 0',
