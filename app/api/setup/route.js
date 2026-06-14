@@ -64,7 +64,22 @@ export async function GET(req) {
       )
     `
 
-    return NextResponse.json({ ok: true, message: 'Database initialized (users + saved_analyses + competitors + profit_benchmarks)' })
+    await sql`
+      CREATE TABLE IF NOT EXISTS area_demographics (
+        id                 UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        name               TEXT NOT NULL,
+        lat_min            DOUBLE PRECISION NOT NULL,
+        lat_max            DOUBLE PRECISION NOT NULL,
+        lng_min            DOUBLE PRECISION NOT NULL,
+        lng_max            DOUBLE PRECISION NOT NULL,
+        population_density INTEGER NOT NULL,
+        income_index       INTEGER NOT NULL,
+        area_type          TEXT NOT NULL
+      )
+    `
+    await sql`CREATE INDEX IF NOT EXISTS area_demographics_bbox_idx ON area_demographics (lat_min, lat_max, lng_min, lng_max)`
+
+    return NextResponse.json({ ok: true, message: 'Database initialized (users + saved_analyses + competitors + profit_benchmarks + area_demographics)' })
   } catch (err) {
     console.error('[setup]', err)
     return NextResponse.json({ error: err.message }, { status: 500 })
@@ -308,8 +323,59 @@ export async function POST(req) {
         ('Kafe Permata Hijau',         'Lainnya', -6.2328, 106.7778, 'Permata Hijau')
     `
 
+    // Seed area_demographics — Jakarta districts (BPS-sourced approx data)
+    // population_density: jiwa/km², income_index: 0-100 (daya beli relatif)
+    await sql`TRUNCATE TABLE area_demographics`
+    await sql`
+      INSERT INTO area_demographics (name, lat_min, lat_max, lng_min, lng_max, population_density, income_index, area_type) VALUES
+        -- CBD Pusat
+        ('Sudirman',        -6.220, -6.198, 106.810, 106.830,  8500, 92, 'CBD'),
+        ('SCBD',            -6.235, -6.218, 106.800, 106.815,  5000, 95, 'CBD'),
+        ('Thamrin',         -6.200, -6.185, 106.815, 106.832,  7800, 90, 'CBD'),
+        ('Senayan',         -6.232, -6.210, 106.790, 106.810,  6200, 88, 'commercial'),
+        -- Selatan premium
+        ('Pondok Indah',    -6.302, -6.272, 106.770, 106.800,  4200, 92, 'commercial'),
+        ('Kemang',          -6.280, -6.254, 106.808, 106.832,  9200, 85, 'commercial'),
+        ('PIK',             -6.135, -6.090, 106.728, 106.762,  3200, 90, 'commercial'),
+        ('Permata Hijau',   -6.248, -6.225, 106.770, 106.792,  8500, 82, 'commercial'),
+        ('TB Simatupang',   -6.328, -6.295, 106.808, 106.838,  6500, 80, 'commercial'),
+        ('Gandaria',        -6.272, -6.248, 106.780, 106.802, 11000, 78, 'commercial'),
+        ('Puri Indah',      -6.205, -6.175, 106.728, 106.762,  5500, 82, 'commercial'),
+        -- Selatan mixed
+        ('Kebayoran Baru',  -6.266, -6.238, 106.790, 106.818, 11500, 80, 'mixed'),
+        ('Blok M',          -6.260, -6.236, 106.790, 106.812, 18000, 78, 'commercial'),
+        ('Cipete',          -6.302, -6.275, 106.790, 106.812, 13500, 75, 'mixed'),
+        ('Fatmawati',       -6.305, -6.278, 106.785, 106.808, 15000, 72, 'commercial'),
+        ('Lebak Bulus',     -6.338, -6.305, 106.758, 106.790,  8200, 75, 'mixed'),
+        ('Cilandak',        -6.308, -6.280, 106.790, 106.822, 12500, 73, 'mixed'),
+        ('Kebayoran Lama',  -6.272, -6.238, 106.770, 106.792, 19000, 65, 'mixed'),
+        ('Mampang',         -6.272, -6.244, 106.818, 106.842, 20000, 65, 'mixed'),
+        ('Pancoran',        -6.262, -6.235, 106.840, 106.865, 17000, 65, 'mixed'),
+        ('Kalibata',        -6.285, -6.258, 106.840, 106.865, 16500, 65, 'mixed'),
+        ('Pasar Minggu',    -6.312, -6.280, 106.830, 106.865, 19500, 62, 'mixed'),
+        ('Pejaten',         -6.295, -6.265, 106.828, 106.852, 15500, 68, 'mixed'),
+        ('Condet',          -6.292, -6.260, 106.868, 106.912, 23000, 55, 'residential'),
+        -- Pusat / Menteng
+        ('Menteng',         -6.215, -6.188, 106.830, 106.860, 12500, 88, 'mixed'),
+        ('Kuningan',        -6.248, -6.222, 106.822, 106.850,  9000, 87, 'commercial'),
+        ('Tebet',           -6.252, -6.222, 106.848, 106.878, 20500, 70, 'mixed'),
+        -- Timur
+        ('Jatinegara',      -6.238, -6.208, 106.862, 106.895, 23000, 60, 'mixed'),
+        ('Rawamangun',      -6.205, -6.172, 106.875, 106.908, 15500, 68, 'mixed'),
+        ('Pulo Gadung',     -6.215, -6.172, 106.888, 106.915, 16500, 62, 'mixed'),
+        -- Utara
+        ('Kelapa Gading',   -6.175, -6.138, 106.888, 106.932,  8200, 82, 'commercial'),
+        ('Sunter',          -6.172, -6.130, 106.858, 106.895, 14500, 70, 'mixed'),
+        ('Pluit',           -6.145, -6.100, 106.780, 106.815,  9500, 75, 'mixed'),
+        ('Mangga Dua',      -6.162, -6.128, 106.812, 106.848, 19000, 65, 'commercial'),
+        ('Tanjung Priok',   -6.120, -6.082, 106.850, 106.905, 18500, 55, 'mixed'),
+        -- Barat
+        ('Grogol',          -6.188, -6.155, 106.778, 106.812, 17000, 68, 'mixed')
+    `
+
     const [{ count }] = await sql`SELECT COUNT(*) FROM competitors`
-    return NextResponse.json({ ok: true, message: `Seeded ${count} competitors + 6 profit benchmarks` })
+    const [{ count: demoCount }] = await sql`SELECT COUNT(*) FROM area_demographics`
+    return NextResponse.json({ ok: true, message: `Seeded ${count} competitors + 6 profit benchmarks + ${demoCount} demographic zones` })
   } catch (err) {
     console.error('[seed]', err)
     return NextResponse.json({ error: err.message }, { status: 500 })
