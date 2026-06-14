@@ -41,17 +41,22 @@ export async function GET(req) {
 
     await sql`
       CREATE TABLE IF NOT EXISTS competitors (
-        id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        name       TEXT NOT NULL,
-        category   TEXT NOT NULL,
-        lat        DOUBLE PRECISION NOT NULL,
-        lng        DOUBLE PRECISION NOT NULL,
-        address    TEXT,
-        created_at TIMESTAMPTZ DEFAULT NOW()
+        id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        name            TEXT NOT NULL,
+        category        TEXT NOT NULL,
+        lat             DOUBLE PRECISION NOT NULL,
+        lng             DOUBLE PRECISION NOT NULL,
+        address         TEXT,
+        revenue_min_jt  INTEGER,
+        revenue_max_jt  INTEGER,
+        created_at      TIMESTAMPTZ DEFAULT NOW()
       )
     `
     await sql`CREATE INDEX IF NOT EXISTS competitors_category_idx ON competitors (category)`
     await sql`CREATE INDEX IF NOT EXISTS competitors_latlng_idx ON competitors (lat, lng)`
+    // add columns to existing installs (idempotent)
+    await sql`ALTER TABLE competitors ADD COLUMN IF NOT EXISTS revenue_min_jt INTEGER`
+    await sql`ALTER TABLE competitors ADD COLUMN IF NOT EXISTS revenue_max_jt INTEGER`
 
     await sql`
       CREATE TABLE IF NOT EXISTS profit_benchmarks (
@@ -373,9 +378,61 @@ export async function POST(req) {
         ('Grogol',          -6.188, -6.155, 106.778, 106.812, 17000, 68, 'mixed')
     `
 
+    // Set revenue estimates per brand — run sequentially for clarity
+    // BURGER
+    await sql`UPDATE competitors SET revenue_min_jt=250, revenue_max_jt=450 WHERE name LIKE 'McDonalds%'`
+    await sql`UPDATE competitors SET revenue_min_jt=150, revenue_max_jt=300 WHERE name LIKE 'Burger King%'`
+    await sql`UPDATE competitors SET revenue_min_jt= 80, revenue_max_jt=160 WHERE name LIKE 'Richeese%'`
+    await sql`UPDATE competitors SET revenue_min_jt=200, revenue_max_jt=380 WHERE name LIKE 'Shake Shack%'`
+    await sql`UPDATE competitors SET revenue_min_jt=120, revenue_max_jt=220 WHERE name LIKE 'Wendys%'`
+    await sql`UPDATE competitors SET revenue_min_jt= 50, revenue_max_jt=120 WHERE name LIKE 'Flame Burger%'`
+    await sql`UPDATE competitors SET revenue_min_jt= 30, revenue_max_jt= 70 WHERE name LIKE 'Burger Bangor%'`
+    await sql`UPDATE competitors SET revenue_min_jt= 25, revenue_max_jt= 60 WHERE name LIKE 'Burgushi%'`
+    // AYAM GORENG
+    await sql`UPDATE competitors SET revenue_min_jt=180, revenue_max_jt=350 WHERE name LIKE 'KFC%'`
+    await sql`UPDATE competitors SET revenue_min_jt= 60, revenue_max_jt=130 WHERE name LIKE 'CFC%'`
+    await sql`UPDATE competitors SET revenue_min_jt= 80, revenue_max_jt=160 WHERE name LIKE 'Geprek Bensu%'`
+    await sql`UPDATE competitors SET revenue_min_jt= 40, revenue_max_jt= 90 WHERE name LIKE 'Geprek Express%'`
+    await sql`UPDATE competitors SET revenue_min_jt= 50, revenue_max_jt=110 WHERE name LIKE 'Sabana%'`
+    await sql`UPDATE competitors SET revenue_min_jt= 30, revenue_max_jt= 70 WHERE name LIKE 'Ayam Bakar%'`
+    await sql`UPDATE competitors SET revenue_min_jt= 35, revenue_max_jt= 80 WHERE name LIKE 'Ayam Geprek%'`
+    await sql`UPDATE competitors SET revenue_min_jt= 30, revenue_max_jt= 65 WHERE name LIKE 'Ayam Penyet%'`
+    // KOPI & CAFE
+    await sql`UPDATE competitors SET revenue_min_jt=300, revenue_max_jt=600 WHERE name LIKE 'Starbucks%'`
+    await sql`UPDATE competitors SET revenue_min_jt= 80, revenue_max_jt=180 WHERE name LIKE 'Kopi Kenangan%'`
+    await sql`UPDATE competitors SET revenue_min_jt= 50, revenue_max_jt=120 WHERE name LIKE 'Janji Jiwa%'`
+    await sql`UPDATE competitors SET revenue_min_jt= 60, revenue_max_jt=130 WHERE name LIKE 'Fore Coffee%'`
+    await sql`UPDATE competitors SET revenue_min_jt= 40, revenue_max_jt=100 WHERE name LIKE 'Tomoro Coffee%'`
+    await sql`UPDATE competitors SET revenue_min_jt= 35, revenue_max_jt= 80 WHERE name LIKE 'Kopi Soe%'`
+    // MIE & BAKSO
+    await sql`UPDATE competitors SET revenue_min_jt=100, revenue_max_jt=200 WHERE name LIKE 'Mie Gacoan%'`
+    await sql`UPDATE competitors SET revenue_min_jt= 30, revenue_max_jt= 70 WHERE name LIKE 'Bakso Malang%'`
+    await sql`UPDATE competitors SET revenue_min_jt= 25, revenue_max_jt= 60 WHERE name LIKE 'Bakso Pak Man%'`
+    await sql`UPDATE competitors SET revenue_min_jt= 20, revenue_max_jt= 50 WHERE name LIKE 'Mie Ayam Solo%'`
+    await sql`UPDATE competitors SET revenue_min_jt= 25, revenue_max_jt= 55 WHERE name LIKE 'Bakso Urat%'`
+    // MINUMAN
+    await sql`UPDATE competitors SET revenue_min_jt= 60, revenue_max_jt=140 WHERE name LIKE 'Chatime%'`
+    await sql`UPDATE competitors SET revenue_min_jt= 40, revenue_max_jt= 90 WHERE name LIKE 'Mixue%'`
+    await sql`UPDATE competitors SET revenue_min_jt= 80, revenue_max_jt=160 WHERE name LIKE 'KOI The%'`
+    await sql`UPDATE competitors SET revenue_min_jt= 30, revenue_max_jt= 70 WHERE name LIKE 'Xi Bo Ba%'`
+    await sql`UPDATE competitors SET revenue_min_jt= 25, revenue_max_jt= 60 WHERE name LIKE 'Boba Time%'`
+    // LAINNYA — by name pattern
+    await sql`UPDATE competitors SET revenue_min_jt= 80, revenue_max_jt=160 WHERE name LIKE 'Waroeng%'`
+    await sql`UPDATE competitors SET revenue_min_jt= 50, revenue_max_jt=120 WHERE name LIKE 'Sate Senayan%'`
+    await sql`UPDATE competitors SET revenue_min_jt= 30, revenue_max_jt= 80 WHERE name LIKE 'Restoran%'`
+    await sql`UPDATE competitors SET revenue_min_jt= 15, revenue_max_jt= 40 WHERE name LIKE 'Warung%'`
+    await sql`UPDATE competitors SET revenue_min_jt= 25, revenue_max_jt= 65 WHERE name LIKE 'Kafe%'`
+    await sql`UPDATE competitors SET revenue_min_jt= 20, revenue_max_jt= 55 WHERE name LIKE 'Nasi%'`
+    await sql`UPDATE competitors SET revenue_min_jt= 20, revenue_max_jt= 50 WHERE name LIKE 'Soto%'`
+    await sql`UPDATE competitors SET revenue_min_jt= 25, revenue_max_jt= 55 WHERE name LIKE 'Bakso Soto%'`
+    await sql`UPDATE competitors SET revenue_min_jt= 20, revenue_max_jt= 50 WHERE name LIKE 'Sate Taichan%'`
+    // Fallback for any competitor still without revenue data
+    await sql`UPDATE competitors SET revenue_min_jt=20, revenue_max_jt=60 WHERE revenue_min_jt IS NULL`
+
     const [{ count }] = await sql`SELECT COUNT(*) FROM competitors`
     const [{ count: demoCount }] = await sql`SELECT COUNT(*) FROM area_demographics`
-    return NextResponse.json({ ok: true, message: `Seeded ${count} competitors + 6 profit benchmarks + ${demoCount} demographic zones` })
+    const [{ count: revenueCount }] = await sql`SELECT COUNT(*) FROM competitors WHERE revenue_min_jt IS NOT NULL`
+    return NextResponse.json({ ok: true, message: `Seeded ${count} competitors (${revenueCount} with revenue) + 6 profit benchmarks + ${demoCount} demographic zones` })
   } catch (err) {
     console.error('[seed]', err)
     return NextResponse.json({ error: err.message }, { status: 500 })

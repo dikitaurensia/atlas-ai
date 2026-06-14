@@ -68,7 +68,7 @@ async function fetchDBData(lat, lng, category, radius) {
   const [rows, benchmarkRows, demoRows] = await Promise.all([
     sql`
       SELECT * FROM (
-        SELECT id, name, lat, lng, address,
+        SELECT id, name, lat, lng, address, revenue_min_jt, revenue_max_jt,
           6371000 * acos(
             LEAST(1.0,
               cos(radians(${lat})) * cos(radians(lat)) *
