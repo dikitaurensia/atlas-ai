@@ -104,7 +104,10 @@ export default function ResultPanel({ result, onSave, isSaved, category, locatio
             Rp {result.profitMax} jt
           </div>
           <div style={s.profitNote}>
-            Referensi {result.referenceCount}+ outlet ESB dalam radius {result.referenceRadius} km
+            {result.referenceCount
+              ? `Referensi ${result.referenceCount}+ outlet ESB dalam radius ${result.referenceRadius} km`
+              : 'Data estimasi dari benchmark kategori'
+            }
           </div>
         </div>
 
