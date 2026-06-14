@@ -133,6 +133,14 @@ export async function POST(request) {
   const footTraffic = trafficResult.status === 'fulfilled' ? trafficResult.value : null
   const accessibility = accessibilityResult.status === 'fulfilled' ? accessibilityResult.value : null
 
+  // Area di luar cakupan demografis → tidak didukung
+  if (!demographics) {
+    return Response.json({
+      unsupported: true,
+      message: 'Area ini berada di luar cakupan AtlasAI. Saat ini kami mendukung analisis untuk wilayah DKI Jakarta.',
+    })
+  }
+
   const result = generateAnalysis(
     { lat, lng }, category, radius,
     { nearbyCompetitors, benchmark, footTraffic, accessibility, demographics }

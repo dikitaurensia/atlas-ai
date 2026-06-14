@@ -26,6 +26,23 @@ function gradeConfig(overall) {
 
 export default function ResultPanel({ result, onSave, isSaved, category, location }) {
   const [pdfOpen, setPdfOpen] = useState(false)
+
+  if (result.unsupported) {
+    return (
+      <div style={s.unsupportedWrap}>
+        <div style={s.unsupportedIcon}>
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M12 8v4m0 4h.01"/>
+          </svg>
+        </div>
+        <p style={s.unsupportedTitle}>Area Belum Didukung</p>
+        <p style={s.unsupportedDesc}>{result.message}</p>
+        <p style={s.unsupportedHint}>Coba pilih lokasi di dalam wilayah DKI Jakarta.</p>
+      </div>
+    )
+  }
+
   const grade = gradeConfig(result.overall)
 
   return (
@@ -59,10 +76,16 @@ export default function ResultPanel({ result, onSave, isSaved, category, locatio
               <div key={d.label} style={s.dimRow}>
                 <div style={s.dimTop}>
                   <span style={s.dimLabel}>{d.label}</span>
-                  <span style={{ ...s.dimScore, color: scoreColor(d.score) }}>{d.score}</span>
+                  {d.score !== null
+                    ? <span style={{ ...s.dimScore, color: scoreColor(d.score) }}>{d.score}</span>
+                    : <span style={s.dimNA}>N/A</span>
+                  }
                 </div>
                 <div style={s.dimBar}>
-                  <div style={{ ...s.dimFill, width: `${d.score}%`, background: scoreColor(d.score) }} />
+                  {d.score !== null
+                    ? <div style={{ ...s.dimFill, width: `${d.score}%`, background: scoreColor(d.score) }} />
+                    : <div style={s.dimFillNA} />
+                  }
                 </div>
               </div>
             ))}
@@ -196,7 +219,18 @@ const s = {
   dimLabel: { fontSize: 11, color: 'var(--txt-2)', fontWeight: 500 },
   dimScore: { fontSize: 11, fontWeight: 800 },
   dimBar: { height: 4, background: '#243248', borderRadius: 2, overflow: 'hidden' },
-  dimFill: { height: '100%', borderRadius: 2, transition: 'width 0.7s ease' },
+  dimFill:   { height: '100%', borderRadius: 2, transition: 'width 0.7s ease' },
+  dimFillNA: { height: '100%', borderRadius: 2, width: '100%', background: 'repeating-linear-gradient(90deg, var(--sb-border) 0, var(--sb-border) 4px, transparent 4px, transparent 8px)' },
+  dimNA:     { fontSize: 11, fontWeight: 600, color: 'var(--txt-3)' },
+  unsupportedWrap: {
+    flex: 1, display: 'flex', flexDirection: 'column',
+    alignItems: 'center', justifyContent: 'center',
+    padding: '28px 20px', textAlign: 'center', gap: 10,
+  },
+  unsupportedIcon: { color: '#F59E0B', marginBottom: 4 },
+  unsupportedTitle: { fontSize: 13, fontWeight: 700, color: 'var(--txt-1)' },
+  unsupportedDesc:  { fontSize: 11, color: 'var(--txt-2)', lineHeight: 1.6 },
+  unsupportedHint:  { fontSize: 10, color: 'var(--txt-3)' },
 
   profitCard: {
     padding: '14px',
