@@ -328,54 +328,70 @@ export async function POST(req) {
         ('Kafe Permata Hijau',         'Lainnya', -6.2328, 106.7778, 'Permata Hijau')
     `
 
-    // Seed area_demographics — Jakarta districts (BPS-sourced approx data)
-    // population_density: jiwa/km², income_index: 0-100 (daya beli relatif)
+    // Seed area_demographics — BPS 2020 approx data
+    // Layer 1: 44 kecamatan Jakarta (kecamatan = larger bounding box, fallback coverage)
+    // Layer 2: 8 fine-grained sub-zones CBD/premium (smaller bbox → query picks these first)
+    // population_density: jiwa/km² (BPS Sensus 2020, approximate)
+    // income_index: 0–100 (daya beli relatif, BPS-derived)
     await sql`TRUNCATE TABLE area_demographics`
     await sql`
       INSERT INTO area_demographics (name, lat_min, lat_max, lng_min, lng_max, population_density, income_index, area_type) VALUES
-        -- CBD Pusat
-        ('Sudirman',        -6.220, -6.198, 106.810, 106.830,  8500, 92, 'CBD'),
-        ('SCBD',            -6.235, -6.218, 106.800, 106.815,  5000, 95, 'CBD'),
-        ('Thamrin',         -6.200, -6.185, 106.815, 106.832,  7800, 90, 'CBD'),
-        ('Senayan',         -6.232, -6.210, 106.790, 106.810,  6200, 88, 'commercial'),
-        -- Selatan premium
-        ('Pondok Indah',    -6.302, -6.272, 106.770, 106.800,  4200, 92, 'commercial'),
-        ('Kemang',          -6.280, -6.254, 106.808, 106.832,  9200, 85, 'commercial'),
-        ('PIK',             -6.135, -6.090, 106.728, 106.762,  3200, 90, 'commercial'),
-        ('Permata Hijau',   -6.248, -6.225, 106.770, 106.792,  8500, 82, 'commercial'),
-        ('TB Simatupang',   -6.328, -6.295, 106.808, 106.838,  6500, 80, 'commercial'),
-        ('Gandaria',        -6.272, -6.248, 106.780, 106.802, 11000, 78, 'commercial'),
-        ('Puri Indah',      -6.205, -6.175, 106.728, 106.762,  5500, 82, 'commercial'),
-        -- Selatan mixed
-        ('Kebayoran Baru',  -6.266, -6.238, 106.790, 106.818, 11500, 80, 'mixed'),
-        ('Blok M',          -6.260, -6.236, 106.790, 106.812, 18000, 78, 'commercial'),
-        ('Cipete',          -6.302, -6.275, 106.790, 106.812, 13500, 75, 'mixed'),
-        ('Fatmawati',       -6.305, -6.278, 106.785, 106.808, 15000, 72, 'commercial'),
-        ('Lebak Bulus',     -6.338, -6.305, 106.758, 106.790,  8200, 75, 'mixed'),
-        ('Cilandak',        -6.308, -6.280, 106.790, 106.822, 12500, 73, 'mixed'),
-        ('Kebayoran Lama',  -6.272, -6.238, 106.770, 106.792, 19000, 65, 'mixed'),
-        ('Mampang',         -6.272, -6.244, 106.818, 106.842, 20000, 65, 'mixed'),
-        ('Pancoran',        -6.262, -6.235, 106.840, 106.865, 17000, 65, 'mixed'),
-        ('Kalibata',        -6.285, -6.258, 106.840, 106.865, 16500, 65, 'mixed'),
-        ('Pasar Minggu',    -6.312, -6.280, 106.830, 106.865, 19500, 62, 'mixed'),
-        ('Pejaten',         -6.295, -6.265, 106.828, 106.852, 15500, 68, 'mixed'),
-        ('Condet',          -6.292, -6.260, 106.868, 106.912, 23000, 55, 'residential'),
-        -- Pusat / Menteng
-        ('Menteng',         -6.215, -6.188, 106.830, 106.860, 12500, 88, 'mixed'),
-        ('Kuningan',        -6.248, -6.222, 106.822, 106.850,  9000, 87, 'commercial'),
-        ('Tebet',           -6.252, -6.222, 106.848, 106.878, 20500, 70, 'mixed'),
-        -- Timur
-        ('Jatinegara',      -6.238, -6.208, 106.862, 106.895, 23000, 60, 'mixed'),
-        ('Rawamangun',      -6.205, -6.172, 106.875, 106.908, 15500, 68, 'mixed'),
-        ('Pulo Gadung',     -6.215, -6.172, 106.888, 106.915, 16500, 62, 'mixed'),
-        -- Utara
-        ('Kelapa Gading',   -6.175, -6.138, 106.888, 106.932,  8200, 82, 'commercial'),
-        ('Sunter',          -6.172, -6.130, 106.858, 106.895, 14500, 70, 'mixed'),
-        ('Pluit',           -6.145, -6.100, 106.780, 106.815,  9500, 75, 'mixed'),
-        ('Mangga Dua',      -6.162, -6.128, 106.812, 106.848, 19000, 65, 'commercial'),
-        ('Tanjung Priok',   -6.120, -6.082, 106.850, 106.905, 18500, 55, 'mixed'),
-        -- Barat
-        ('Grogol',          -6.188, -6.155, 106.778, 106.812, 17000, 68, 'mixed')
+        -- ===== JAKARTA PUSAT (8 kecamatan) =====
+        ('Gambir',              -6.188, -6.152, 106.792, 106.838, 12200, 82, 'mixed'),
+        ('Sawah Besar',         -6.170, -6.140, 106.818, 106.860, 25800, 65, 'permukiman padat'),
+        ('Kemayoran',           -6.200, -6.158, 106.842, 106.885, 43500, 60, 'permukiman padat'),
+        ('Senen',               -6.195, -6.165, 106.840, 106.878, 28200, 65, 'mixed'),
+        ('Cempaka Putih',       -6.200, -6.162, 106.865, 106.905, 28800, 68, 'mixed'),
+        ('Menteng',             -6.220, -6.188, 106.822, 106.862, 13500, 88, 'permukiman menengah-atas'),
+        ('Tanah Abang',         -6.225, -6.185, 106.788, 106.832, 32500, 72, 'commercial'),
+        ('Johar Baru',          -6.200, -6.162, 106.855, 106.892, 44200, 55, 'permukiman padat'),
+        -- ===== JAKARTA UTARA (6 kecamatan) =====
+        ('Penjaringan',         -6.145, -6.088, 106.748, 106.852, 11800, 72, 'mixed'),
+        ('Pademangan',          -6.165, -6.125, 106.830, 106.872, 17500, 60, 'mixed'),
+        ('Tanjung Priok',       -6.160, -6.095, 106.850, 106.935, 14200, 55, 'mixed'),
+        ('Koja',                -6.165, -6.105, 106.885, 106.948, 23500, 48, 'permukiman padat'),
+        ('Kelapa Gading',       -6.182, -6.135, 106.890, 106.968, 10200, 82, 'commercial'),
+        ('Cilincing',           -6.152, -6.078, 106.928, 106.995, 10500, 42, 'mixed'),
+        -- ===== JAKARTA BARAT (8 kecamatan) =====
+        ('Tambora',             -6.182, -6.135, 106.782, 106.832, 55800, 40, 'permukiman padat'),
+        ('Taman Sari',          -6.172, -6.128, 106.810, 106.852, 35500, 60, 'mixed'),
+        ('Grogol Petamburan',   -6.200, -6.152, 106.775, 106.825, 29200, 68, 'mixed'),
+        ('Palmerah',            -6.232, -6.195, 106.775, 106.820, 31800, 65, 'mixed'),
+        ('Kebon Jeruk',         -6.242, -6.192, 106.748, 106.802, 16200, 68, 'mixed'),
+        ('Kembangan',           -6.245, -6.180, 106.708, 106.768, 8800,  62, 'mixed'),
+        ('Cengkareng',          -6.192, -6.118, 106.715, 106.798, 12500, 58, 'mixed'),
+        ('Kalideres',           -6.182, -6.112, 106.670, 106.755, 9200,  55, 'mixed'),
+        -- ===== JAKARTA SELATAN (10 kecamatan) =====
+        ('Tebet',               -6.255, -6.212, 106.842, 106.885, 22500, 70, 'mixed'),
+        ('Setiabudi',           -6.245, -6.198, 106.798, 106.855, 11800, 88, 'commercial'),
+        ('Mampang Prapatan',    -6.275, -6.232, 106.795, 106.848, 15200, 68, 'mixed'),
+        ('Pancoran',            -6.278, -6.235, 106.835, 106.882, 15500, 65, 'mixed'),
+        ('Kebayoran Baru',      -6.278, -6.228, 106.772, 106.820, 10800, 85, 'permukiman menengah-atas'),
+        ('Kebayoran Lama',      -6.308, -6.255, 106.758, 106.812, 18200, 65, 'mixed'),
+        ('Pesanggrahan',        -6.335, -6.275, 106.735, 106.795, 13800, 62, 'mixed'),
+        ('Cilandak',            -6.335, -6.272, 106.785, 106.842, 7800,  78, 'mixed'),
+        ('Pasar Minggu',        -6.335, -6.268, 106.828, 106.882, 12200, 62, 'mixed'),
+        ('Jagakarsa',           -6.378, -6.305, 106.788, 106.868, 8800,  55, 'mixed'),
+        -- ===== JAKARTA TIMUR (10 kecamatan) =====
+        ('Matraman',            -6.235, -6.195, 106.855, 106.898, 25500, 65, 'mixed'),
+        ('Jatinegara',          -6.258, -6.212, 106.868, 106.928, 24200, 60, 'mixed'),
+        ('Kramat Jati',         -6.305, -6.255, 106.865, 106.928, 14200, 58, 'mixed'),
+        ('Makassar',            -6.258, -6.205, 106.892, 106.948, 17500, 58, 'mixed'),
+        ('Pulo Gadung',         -6.228, -6.178, 106.888, 106.948, 16500, 62, 'mixed'),
+        ('Cakung',              -6.232, -6.145, 106.928, 107.015, 7800,  50, 'mixed'),
+        ('Duren Sawit',         -6.285, -6.218, 106.905, 106.968, 16200, 58, 'mixed'),
+        ('Cipayung',            -6.355, -6.278, 106.885, 106.965, 7500,  50, 'mixed'),
+        ('Ciracas',             -6.328, -6.258, 106.862, 106.935, 9200,  52, 'mixed'),
+        ('Pasar Rebo',          -6.365, -6.305, 106.845, 106.912, 12500, 55, 'mixed'),
+        -- ===== FINE-GRAINED: CBD & PREMIUM (lebih kecil → prioritas lebih tinggi) =====
+        ('SCBD / Sudirman',     -6.235, -6.200, 106.798, 106.835,  6200, 95, 'CBD'),
+        ('Thamrin / Monas',     -6.202, -6.182, 106.812, 106.835,  7800, 90, 'CBD'),
+        ('Kuningan / Rasuna',   -6.248, -6.218, 106.820, 106.852,  9000, 88, 'commercial'),
+        ('Kemang',              -6.282, -6.252, 106.806, 106.835,  9200, 85, 'commercial'),
+        ('Pondok Indah',        -6.305, -6.272, 106.768, 106.800,  4200, 92, 'commercial'),
+        ('PIK / Pantai Indah',  -6.138, -6.088, 106.725, 106.765,  3200, 90, 'commercial'),
+        ('TB Simatupang',       -6.332, -6.295, 106.805, 106.840,  6500, 80, 'commercial'),
+        ('Sunter / Pluit',      -6.175, -6.118, 106.855, 106.900, 13500, 70, 'mixed')
     `
 
     // Set revenue estimates per brand — run sequentially for clarity
