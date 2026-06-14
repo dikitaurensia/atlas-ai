@@ -132,7 +132,7 @@ function ListPanel({ historyItems, onClose, onItemClick }) {
               <circle cx="12" cy="10" r="3"/>
             </svg>
             <p style={s.emptyText}>Belum ada analisis tersimpan</p>
-            <p style={s.emptyHint}>Klik "Simpan" setelah menganalisis lokasi</p>
+            <p style={s.emptyHint}>Klik &ldquo;Simpan&rdquo; setelah menganalisis lokasi</p>
           </div>
         ) : (
           items.map((item, i) => (
