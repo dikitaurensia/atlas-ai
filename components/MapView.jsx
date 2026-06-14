@@ -54,18 +54,6 @@ const competitorIcon = (i) => L.divIcon({
   iconAnchor: [13, 13],
 })
 
-function MapInit() {
-  const map = useMap()
-  useEffect(() => {
-    if (!navigator.geolocation) return
-    navigator.geolocation.getCurrentPosition(
-      (pos) => map.flyTo([pos.coords.latitude, pos.coords.longitude], 15, { duration: 1.5 }),
-      () => {},
-      { timeout: 8000, enableHighAccuracy: true }
-    )
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
-  return null
-}
 
 function ClickHandler({ onLocationSelect }) {
   useMapEvents({ click: e => onLocationSelect(e.latlng) })
@@ -104,7 +92,7 @@ export default function MapView({ selectedLocation, onLocationSelect, radius, an
 
   return (
     <div style={s.wrap}>
-      <MapContainer center={CENTER} zoom={13}
+      <MapContainer center={CENTER} zoom={12}
         style={{ width: '100%', height: '100%' }} zoomControl={false}>
 
         {/* Dark CartoDB tiles */}
@@ -114,7 +102,6 @@ export default function MapView({ selectedLocation, onLocationSelect, radius, an
           maxZoom={19}
         />
 
-        <MapInit />
         <ClickHandler onLocationSelect={onLocationSelect} />
         {selectedLocation && <FlyTo location={selectedLocation} />}
 
