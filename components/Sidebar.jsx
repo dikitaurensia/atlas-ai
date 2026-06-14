@@ -55,11 +55,7 @@ export default function Sidebar({
             location={selectedLocation}
           />
         ) : (
-          <EmptyState
-            selectedCategory={selectedCategory}
-            onAnalyze={onAnalyze}
-            canAnalyze={canAnalyze}
-          />
+          <EmptyState selectedCategory={selectedCategory} />
         )}
       </div>
 

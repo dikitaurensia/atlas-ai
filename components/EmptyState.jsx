@@ -6,7 +6,7 @@ const STEPS = [
   { n: 3, label: 'Baca skor & insight' },
 ]
 
-export default function EmptyState({ selectedCategory, canAnalyze, onAnalyze }) {
+export default function EmptyState({ selectedCategory }) {
   const step = selectedCategory ? 2 : 1
 
   return (
@@ -40,14 +40,6 @@ export default function EmptyState({ selectedCategory, canAnalyze, onAnalyze }) 
         })}
       </div>
 
-      {canAnalyze && (
-        <button style={s.cta} onClick={onAnalyze}>
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
-          </svg>
-          Mulai Analisis
-        </button>
-      )}
     </div>
   )
 }
@@ -104,13 +96,4 @@ const s = {
   stepLabel: { fontSize: 11, color: 'var(--txt-3)', fontWeight: 500, textAlign: 'left' },
   stepLabelDone: { color: 'var(--txt-2)' },
   stepLabelActive: { color: 'var(--txt-1)', fontWeight: 600 },
-  cta: {
-    width: '100%', padding: '10px', border: 'none',
-    borderRadius: 8, cursor: 'pointer',
-    background: 'var(--cta)',
-    boxShadow: '0 4px 14px rgba(240,90,40,0.3)',
-    color: '#fff', fontSize: 12, fontWeight: 700,
-    fontFamily: 'inherit',
-    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-  },
 }

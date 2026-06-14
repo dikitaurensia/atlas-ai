@@ -126,11 +126,7 @@ export default function MobileBottomSheet({
             location={selectedLocation}
           />
         ) : (
-          <EmptyState
-            selectedCategory={selectedCategory}
-            onAnalyze={onAnalyze}
-            canAnalyze={canAnalyze}
-          />
+          <EmptyState selectedCategory={selectedCategory} />
         )}
       </div>
 
