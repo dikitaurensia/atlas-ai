@@ -92,6 +92,27 @@ export default function MobileBottomSheet({
         <CategoryPicker selected={selectedCategory} onChange={onCategoryChange} />
         <div style={s.divider} />
         <RadiusSlider value={radius} onChange={onRadiusChange} />
+        <div style={s.analyzeBtnWrap}>
+          <button
+            style={{ ...s.analyzeBtn, ...(!canAnalyze || isAnalyzing ? s.analyzeBtnDisabled : {}) }}
+            onClick={onAnalyze}
+            disabled={!canAnalyze || isAnalyzing}
+          >
+            {isAnalyzing ? (
+              <>
+                <span style={s.analyzeBtnSpinner} />
+                Menganalisis…
+              </>
+            ) : (
+              <>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+                </svg>
+                {!selectedLocation ? 'Pilih lokasi di peta' : !selectedCategory ? 'Pilih kategori' : 'Mulai Analisis'}
+              </>
+            )}
+          </button>
+        </div>
         <div style={s.divider} />
 
         {isAnalyzing ? (
@@ -135,10 +156,10 @@ const s = {
   sheet: {
     position: 'fixed', left: 0, right: 0, bottom: 0,
     zIndex: 500,
-    background: 'var(--sb-bg)',
-    borderTop: '1px solid var(--sb-border-md)',
+    background: 'var(--sb-surface)',
+    borderTop: '1px solid var(--sb-border)',
     borderRadius: '16px 16px 0 0',
-    boxShadow: '0 -8px 40px rgba(0,0,0,0.5)',
+    boxShadow: '0 -4px 24px rgba(0,0,0,0.1)',
     display: 'flex', flexDirection: 'column',
     overflow: 'hidden',
   },
@@ -150,7 +171,7 @@ const s = {
   },
   handle: {
     width: 36, height: 4, borderRadius: 2,
-    background: 'rgba(255,255,255,0.15)', flexShrink: 0,
+    background: '#CBD5E1', flexShrink: 0,
   },
   peekLabel: { display: 'flex', alignItems: 'center', gap: 8 },
   peekCat: { fontSize: 13, fontWeight: 700, color: 'var(--txt-1)' },
@@ -167,6 +188,31 @@ const s = {
     display: 'flex', justifyContent: 'center',
   },
   footerText: { fontSize: 9, color: 'var(--txt-3)', letterSpacing: '0.3px' },
+
+  analyzeBtnWrap: { padding: '10px 14px 12px' },
+  analyzeBtn: {
+    width: '100%', padding: '11px', border: 'none',
+    borderRadius: 8, cursor: 'pointer',
+    background: 'var(--cta)',
+    boxShadow: '0 4px 14px rgba(6,182,212,0.3)',
+    color: '#fff', fontSize: 13, fontWeight: 700,
+    fontFamily: 'inherit',
+    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+    transition: 'all 0.15s',
+  },
+  analyzeBtnDisabled: {
+    background: 'var(--sb-card)',
+    color: 'var(--txt-3)',
+    boxShadow: 'none',
+    cursor: 'not-allowed',
+  },
+  analyzeBtnSpinner: {
+    width: 13, height: 13, borderRadius: '50%',
+    border: '2px solid rgba(255,255,255,0.3)',
+    borderTopColor: '#fff',
+    animation: 'spin 0.7s linear infinite',
+    display: 'inline-block', flexShrink: 0,
+  },
 }
 
 const ls = {
@@ -177,7 +223,7 @@ const ls = {
   },
   ring: {
     width: 40, height: 40, borderRadius: '50%',
-    border: '2px solid rgba(37,99,235,0.25)',
+    border: '2px solid rgba(27,53,102,0.25)',
     borderTopColor: 'var(--accent)',
     animation: 'spin 0.8s linear infinite',
   },

@@ -56,24 +56,18 @@ function GeoIllustration() {
   return (
     <div style={{ position: 'relative', width: 100, height: 80, margin: '0 auto 16px' }}>
       <svg width="100" height="80" viewBox="0 0 100 80" fill="none">
-        {/* Map base */}
-        <rect x="8" y="12" width="84" height="56" rx="6" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.08)" strokeWidth="1"/>
-        {/* Grid lines */}
-        <line x1="8" y1="40" x2="92" y2="40" stroke="rgba(255,255,255,0.05)" strokeWidth="1"/>
-        <line x1="50" y1="12" x2="50" y2="68" stroke="rgba(255,255,255,0.05)" strokeWidth="1"/>
-        {/* Roads */}
-        <path d="M20 30 Q35 25 50 30 Q65 35 80 28" stroke="rgba(255,255,255,0.1)" strokeWidth="1.5" fill="none"/>
-        <path d="M15 52 Q35 48 55 52 Q70 55 88 50" stroke="rgba(255,255,255,0.1)" strokeWidth="1.5" fill="none"/>
-        {/* Pulse ring */}
-        <circle cx="50" cy="40" r="14" stroke="rgba(37,99,235,0.2)" strokeWidth="1" fill="none"/>
-        <circle cx="50" cy="40" r="9" stroke="rgba(37,99,235,0.35)" strokeWidth="1.5" fill="rgba(37,99,235,0.06)"/>
-        {/* Pin */}
+        <rect x="8" y="12" width="84" height="56" rx="6" fill="#1E293B" stroke="#2D3D5A" strokeWidth="1.5"/>
+        <line x1="8" y1="40" x2="92" y2="40" stroke="#2D3D5A" strokeWidth="1"/>
+        <line x1="50" y1="12" x2="50" y2="68" stroke="#2D3D5A" strokeWidth="1"/>
+        <path d="M20 30 Q35 25 50 30 Q65 35 80 28" stroke="#3D5070" strokeWidth="1.5" fill="none"/>
+        <path d="M15 52 Q35 48 55 52 Q70 55 88 50" stroke="#3D5070" strokeWidth="1.5" fill="none"/>
+        <circle cx="50" cy="40" r="14" stroke="rgba(6,182,212,0.2)" strokeWidth="1" fill="none"/>
+        <circle cx="50" cy="40" r="9" stroke="rgba(6,182,212,0.35)" strokeWidth="1.5" fill="rgba(6,182,212,0.08)"/>
         <circle cx="50" cy="40" r="4" fill="var(--accent)"/>
         <circle cx="50" cy="40" r="2" fill="white"/>
-        {/* Competitor dots */}
-        <circle cx="32" cy="30" r="3" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.3)" strokeWidth="1"/>
-        <circle cx="68" cy="50" r="3" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.3)" strokeWidth="1"/>
-        <circle cx="38" cy="55" r="2.5" fill="rgba(255,255,255,0.15)" stroke="rgba(255,255,255,0.25)" strokeWidth="1"/>
+        <circle cx="32" cy="30" r="3" fill="#243248" stroke="#3D5070" strokeWidth="1.5"/>
+        <circle cx="68" cy="50" r="3" fill="#243248" stroke="#3D5070" strokeWidth="1.5"/>
+        <circle cx="38" cy="55" r="2.5" fill="#243248" stroke="#3D5070" strokeWidth="1"/>
       </svg>
     </div>
   )
@@ -93,7 +87,7 @@ const s = {
   step: {
     display: 'flex', alignItems: 'center', gap: 10,
     padding: '8px 12px', borderRadius: 8,
-    background: 'rgba(255,255,255,0.03)',
+    background: 'var(--sb-surface)',
     border: '1px solid var(--sb-border)',
   },
   stepActive: {
@@ -103,7 +97,7 @@ const s = {
     width: 20, height: 20, borderRadius: '50%', flexShrink: 0,
     display: 'flex', alignItems: 'center', justifyContent: 'center',
     fontSize: 9, fontWeight: 800,
-    background: 'rgba(255,255,255,0.06)', color: 'var(--txt-3)',
+    background: '#F1F5F9', color: 'var(--txt-3)',
   },
   stepDone: { background: '#10B981', color: '#fff' },
   stepCurrent: { background: 'var(--accent)', color: '#fff' },
@@ -113,8 +107,8 @@ const s = {
   cta: {
     width: '100%', padding: '10px', border: 'none',
     borderRadius: 8, cursor: 'pointer',
-    background: 'var(--accent)',
-    boxShadow: '0 4px 14px rgba(37,99,235,0.35)',
+    background: 'var(--cta)',
+    boxShadow: '0 4px 14px rgba(240,90,40,0.3)',
     color: '#fff', fontSize: 12, fontWeight: 700,
     fontFamily: 'inherit',
     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,

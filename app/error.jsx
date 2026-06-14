@@ -23,7 +23,7 @@ export default function Error({ error, reset }) {
         onClick={reset}
         style={{
           padding: '8px 16px', borderRadius: 8, border: 'none',
-          background: '#2563EB', color: '#fff', cursor: 'pointer',
+          background: '#1B3566', color: '#fff', cursor: 'pointer',
           fontSize: 13, fontWeight: 600,
         }}
       >

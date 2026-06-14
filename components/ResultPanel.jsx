@@ -4,11 +4,11 @@ import { useState } from 'react'
 import PDFPreviewModal from './PDFPreviewModal'
 
 const TAG_COLORS = {
-  positive: { bg: 'rgba(16,185,129,0.12)', color: '#34D399', bd: 'rgba(16,185,129,0.2)' },
-  warning:  { bg: 'rgba(245,158,11,0.12)', color: '#FCD34D', bd: 'rgba(245,158,11,0.2)' },
-  negative: { bg: 'rgba(239,68,68,0.12)',  color: '#F87171', bd: 'rgba(239,68,68,0.2)'  },
-  info:     { bg: 'rgba(59,130,246,0.12)', color: '#93C5FD', bd: 'rgba(59,130,246,0.2)' },
-  neutral:  { bg: 'rgba(255,255,255,0.05)',color: 'var(--txt-2)', bd: 'var(--sb-border)' },
+  positive: { bg: 'rgba(16,185,129,0.08)',  color: '#059669', bd: 'rgba(16,185,129,0.18)' },
+  warning:  { bg: 'rgba(245,158,11,0.08)',  color: '#D97706', bd: 'rgba(245,158,11,0.18)' },
+  negative: { bg: 'rgba(239,68,68,0.08)',   color: '#DC2626', bd: 'rgba(239,68,68,0.15)'  },
+  info:     { bg: 'rgba(6,182,212,0.1)',    color: '#06B6D4', bd: 'rgba(6,182,212,0.25)'  },
+  neutral:  { bg: '#F8FAFC',                color: '#475569', bd: '#E2E8F0'                },
 }
 
 function scoreColor(s) {
@@ -140,7 +140,7 @@ function ScoreRing({ score, color, glow }) {
   return (
     <div style={{ position: 'relative', width: 76, height: 76 }}>
       <svg width="76" height="76" viewBox="0 0 76 76">
-        <circle cx="38" cy="38" r={r} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="5.5"/>
+        <circle cx="38" cy="38" r={r} fill="none" stroke="#E2E8F0" strokeWidth="5.5"/>
         <circle cx="38" cy="38" r={r} fill="none" stroke={color} strokeWidth="5.5"
           strokeDasharray={`${dash} ${circ}`} strokeLinecap="round"
           transform="rotate(-90 38 38)"
@@ -162,22 +162,24 @@ const s = {
 
   scoreHero: {
     display: 'flex', alignItems: 'center', gap: 12,
-    padding: '12px 14px',
-    background: 'var(--sb-card)', borderRadius: 10,
+    padding: '14px',
+    background: 'var(--sb-surface)', borderRadius: 12,
     border: '1px solid var(--sb-border)',
+    boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
   },
   scoreLeft: { flexShrink: 0 },
   scoreRight: { flex: 1 },
   gradePill: {
     display: 'inline-block', fontSize: 10, fontWeight: 700,
-    padding: '3px 8px', borderRadius: 5, marginBottom: 5,
+    padding: '3px 8px', borderRadius: 6, marginBottom: 5,
   },
   scoreSubText: { fontSize: 11, color: 'var(--txt-2)', marginBottom: 3 },
   scoreMeta: { fontSize: 10, color: 'var(--txt-3)' },
 
   analysisCard: {
-    background: 'var(--sb-card)', borderRadius: 10,
+    background: 'var(--sb-surface)', borderRadius: 12,
     border: '1px solid var(--sb-border)',
+    boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
   },
   cardHeader: { padding: '10px 14px 8px', borderBottom: '1px solid var(--sb-border)' },
   cardLabel: {
@@ -193,48 +195,51 @@ const s = {
   dimTop: { display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
   dimLabel: { fontSize: 11, color: 'var(--txt-2)', fontWeight: 500 },
   dimScore: { fontSize: 11, fontWeight: 800 },
-  dimBar: { height: 4, background: 'rgba(255,255,255,0.06)', borderRadius: 2, overflow: 'hidden' },
+  dimBar: { height: 4, background: '#243248', borderRadius: 2, overflow: 'hidden' },
   dimFill: { height: '100%', borderRadius: 2, transition: 'width 0.7s ease' },
 
   profitCard: {
-    padding: '12px 14px',
-    background: 'linear-gradient(135deg, rgba(37,99,235,0.1), rgba(37,99,235,0.04))',
-    borderRadius: 10,
-    border: '1px solid var(--accent-bd)',
+    padding: '14px',
+    background: 'linear-gradient(135deg, rgba(6,182,212,0.12) 0%, rgba(14,165,233,0.07) 100%)',
+    borderRadius: 12,
+    border: '1px solid rgba(6,182,212,0.2)',
+    boxShadow: '0 1px 3px rgba(6,182,212,0.08)',
   },
-  profitTop: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 },
+  profitTop: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 },
   profitBadge: {
-    fontSize: 8, fontWeight: 700, color: 'var(--accent)',
-    background: 'var(--accent-bg)', padding: '1px 6px',
-    borderRadius: 4, border: '1px solid var(--accent-bd)',
+    fontSize: 8, fontWeight: 700, color: '#67E8F9',
+    background: 'rgba(6,182,212,0.12)', padding: '2px 7px',
+    borderRadius: 4, border: '1px solid rgba(6,182,212,0.25)',
   },
-  profitRange: { fontSize: 20, fontWeight: 800, color: '#fff', marginBottom: 4, lineHeight: 1 },
-  profitSep: { color: 'var(--txt-2)', fontWeight: 400 },
+  profitRange: { fontSize: 22, fontWeight: 800, color: '#67E8F9', marginBottom: 4, lineHeight: 1 },
+  profitSep: { color: '#06B6D4', fontWeight: 400 },
   profitNote: { fontSize: 9.5, color: 'var(--txt-3)' },
 
   tagsSection: { display: 'flex', flexWrap: 'wrap', gap: 5 },
-  tag: { fontSize: 9.5, fontWeight: 500, padding: '3px 8px', borderRadius: 5 },
+  tag: { fontSize: 9.5, fontWeight: 600, padding: '3px 8px', borderRadius: 5 },
 
   aiCard: {
-    padding: '11px 14px',
-    background: 'rgba(139,92,246,0.08)',
-    borderRadius: 10, border: '1px solid rgba(139,92,246,0.2)',
+    padding: '12px 14px',
+    background: 'linear-gradient(135deg, rgba(139,92,246,0.12) 0%, rgba(99,102,241,0.07) 100%)',
+    borderRadius: 12, border: '1px solid rgba(139,92,246,0.2)',
   },
-  aiHeader: { display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 },
-  aiDot: { fontSize: 10, color: '#A78BFA' },
+  aiHeader: { display: 'flex', alignItems: 'center', gap: 6, marginBottom: 7 },
+  aiDot: { fontSize: 10, color: '#7C3AED' },
   aiTitle: {
-    fontSize: 9, fontWeight: 700, color: '#A78BFA',
+    fontSize: 9, fontWeight: 700, color: '#7C3AED',
     letterSpacing: '0.7px', textTransform: 'uppercase',
   },
-  aiText: { fontSize: 11, color: 'var(--txt-2)', lineHeight: 1.65, margin: 0 },
+  aiText: { fontSize: 11, color: 'var(--txt-2)', lineHeight: 1.7, margin: 0 },
 
   actions: { display: 'flex', gap: 7 },
   saveBtn: {
     flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5,
-    padding: '9px', border: '1px solid var(--sb-border-md)',
-    borderRadius: 8, background: 'rgba(255,255,255,0.04)',
+    padding: '9px', border: '1px solid var(--sb-border)',
+    borderRadius: 8, background: 'var(--sb-surface)',
     color: 'var(--txt-2)', fontSize: 11, fontWeight: 600,
     cursor: 'pointer', fontFamily: 'inherit',
+    boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
+    transition: 'all 0.15s',
   },
   saveBtnActive: {
     background: 'var(--accent-bg)', color: 'var(--accent)',
@@ -243,9 +248,10 @@ const s = {
   exportBtn: {
     flex: 2, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5,
     padding: '9px', border: 'none',
-    borderRadius: 8, background: 'var(--accent)',
-    boxShadow: '0 4px 12px rgba(37,99,235,0.3)',
+    borderRadius: 8, background: 'var(--cta)',
+    boxShadow: '0 2px 8px rgba(240,90,40,0.3)',
     color: '#fff', fontSize: 11, fontWeight: 700,
     cursor: 'pointer', fontFamily: 'inherit',
+    transition: 'all 0.15s',
   },
 }

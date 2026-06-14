@@ -66,7 +66,7 @@ const s = {
   slider: {
     width: '100%', appearance: 'none', height: 3,
     borderRadius: 2, outline: 'none', cursor: 'pointer', display: 'block',
-    background: `linear-gradient(to right, var(--accent) var(--pct, 0%), rgba(255,255,255,0.1) var(--pct, 0%))`,
+    background: `linear-gradient(to right, var(--accent) var(--pct, 0%), #2D3D5A var(--pct, 0%))`,
   },
   marksWrap: { position: 'relative', height: 14, marginTop: 4 },
   mark: {

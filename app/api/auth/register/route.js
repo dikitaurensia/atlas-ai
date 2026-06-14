@@ -28,8 +28,8 @@ export async function POST(req) {
       RETURNING id, name, bisnis_name, email, created_at
     `
 
-    const token = await signToken({ userId: user.id, email: user.email, name: user.name })
-    const res = NextResponse.json({ ok: true, user: { id: user.id, name: user.name, email: user.email } }, { status: 201 })
+    const token = await signToken({ userId: user.id, email: user.email, name: user.name, bisnis_name: user.bisnis_name })
+    const res = NextResponse.json({ ok: true, user: { id: user.id, name: user.name, bisnis_name: user.bisnis_name, email: user.email } }, { status: 201 })
     res.cookies.set(COOKIE, token, cookieOpts())
     return res
   } catch (err) {

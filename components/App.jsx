@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import Header from './Header'
 import Sidebar from './Sidebar'
 import MapView from './MapView'
@@ -9,16 +9,11 @@ import MobileHeader from './MobileHeader'
 import MobileBottomSheet from './MobileBottomSheet'
 import useIsMobile from '@/hooks/useIsMobile'
 
-const INITIAL_HISTORY = [
-  { id: 1, location: 'Kelapa Gading', category: 'Burger',      score: 76, grade: 'Potensi Bagus',    date: '25 Mei 2026, 11.57', saved: true,  lat: -6.1583, lng: 106.9063 },
-  { id: 2, location: 'Kelapa Gading', category: 'Ayam Goreng', score: 76, grade: 'Potensi Bagus',    date: '25 Mei 2026, 11.33', saved: true,  lat: -6.1601, lng: 106.9020 },
-  { id: 3, location: 'Blok M',        category: 'Ayam Goreng', score: 82, grade: 'Sangat Potensial', date: '25 Mei 2026, 11.33', saved: true,  lat: -6.2441, lng: 106.7983 },
-  { id: 4, location: 'Senayan',       category: 'Kopi & Cafe', score: 86, grade: 'Sangat Potensial', date: '21 Mei 2026, 14.32', saved: true,  lat: -6.2183, lng: 106.8025 },
-  { id: 5, location: 'Kemang',        category: 'Burger',      score: 78, grade: 'Potensi Bagus',    date: '20 Mei 2026, 11.08', saved: false, lat: -6.2622, lng: 106.8129 },
-  { id: 6, location: 'Pondok Indah',  category: 'Ayam Goreng', score: 64, grade: 'Potensi Bagus',    date: '18 Mei 2026, 16.45', saved: true,  lat: -6.2821, lng: 106.7891 },
-  { id: 7, location: 'Tebet Timur',   category: 'Mie & Bakso', score: 71, grade: 'Potensi Bagus',    date: '15 Mei 2026, 09.12', saved: false, lat: -6.2264, lng: 106.8583 },
-  { id: 8, location: 'Kelapa Gading', category: 'Minuman',     score: 74, grade: 'Potensi Bagus',    date: '12 Mei 2026, 19.51', saved: false, lat: -6.1572, lng: 106.9101 },
-]
+function formatDate(iso) {
+  const d = new Date(iso)
+  return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) +
+    ', ' + d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }).replace(':', '.')
+}
 
 export default function App() {
   const [selectedCategory, setSelectedCategory] = useState(null)
@@ -27,10 +22,30 @@ export default function App() {
   const [analysisResult, setAnalysisResult] = useState(null)
   const [isAnalyzing, setIsAnalyzing] = useState(false)
   const [riwayatOpen, setRiwayatOpen] = useState(false)
-  const [historyItems, setHistoryItems] = useState(INITIAL_HISTORY)
+  const [historyItems, setHistoryItems] = useState([])
   const [savedKey, setSavedKey] = useState(null)
   const abortRef = useRef(null)
-  const nextId = useRef(INITIAL_HISTORY.length + 1)
+
+  useEffect(() => {
+    fetch('/api/analysis/history')
+      .then(r => r.json())
+      .then(({ items }) => {
+        if (!items?.length) return
+        setHistoryItems(items.map(h => ({
+          id: h.id,
+          location: h.location,
+          category: h.category,
+          score: h.overall,
+          grade: h.grade,
+          date: formatDate(h.created_at),
+          saved: true,
+          lat: h.lat,
+          lng: h.lng,
+          result: h.result_json,
+        })))
+      })
+      .catch(() => {})
+  }, [])
   const isMobile = useIsMobile()
 
   const runAnalysis = async (latlng, category, r) => {
@@ -62,7 +77,6 @@ export default function App() {
     setSelectedLocation(latlng)
     setAnalysisResult(null)
     setSavedKey(null)
-    if (selectedCategory) runAnalysis(latlng, selectedCategory, radius)
   }
 
   const handleAnalyze = () => {
@@ -76,34 +90,50 @@ export default function App() {
     setSavedKey(null)
   }
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!analysisResult || !selectedLocation || !selectedCategory) return
 
     if (savedKey) {
+      await fetch('/api/analysis/save', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: savedKey }),
+      })
       setHistoryItems(prev => prev.filter(h => h.id !== savedKey))
       setSavedKey(null)
       return
     }
 
-    const now = new Date()
-    const dateStr = now.toLocaleDateString('id-ID', {
-      day: 'numeric', month: 'long', year: 'numeric'
-    }) + ', ' + now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }).replace(':', '.')
+    const locationName = getAreaName(selectedLocation)
+    const res = await fetch('/api/analysis/save', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        location: locationName,
+        category: selectedCategory,
+        lat: selectedLocation.lat,
+        lng: selectedLocation.lng,
+        radius,
+        result: analysisResult,
+      }),
+    })
+    const { id, created_at } = await res.json()
 
     const newItem = {
-      id: nextId.current++,
-      location: getAreaName(selectedLocation),
+      id,
+      location: locationName,
       category: selectedCategory,
       score: analysisResult.overall,
       grade: analysisResult.grade,
-      date: dateStr,
+      date: formatDate(created_at),
       saved: true,
       lat: selectedLocation.lat,
       lng: selectedLocation.lng,
+      result: analysisResult,
     }
 
     setHistoryItems(prev => [newItem, ...prev])
-    setSavedKey(newItem.id)
+    setSavedKey(id)
   }
 
   const handleLocationSearch = ({ lat, lng }) => {
@@ -111,7 +141,6 @@ export default function App() {
     setSelectedLocation(latlng)
     setSavedKey(null)
     setAnalysisResult(null)
-    if (selectedCategory) runAnalysis(latlng, selectedCategory, radius)
   }
 
   const handleHistoryItemClick = (item) => {
@@ -119,8 +148,8 @@ export default function App() {
     const latlng = { lat: item.lat, lng: item.lng }
     setSelectedLocation(latlng)
     setSelectedCategory(item.category)
-    setSavedKey(item.saved ? item.id : null)
-    runAnalysis(latlng, item.category, radius)
+    setSavedKey(item.id)
+    setAnalysisResult(item.result)
     setRiwayatOpen(false)
   }
 

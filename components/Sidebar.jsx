@@ -18,6 +18,27 @@ export default function Sidebar({
         <CategoryPicker selected={selectedCategory} onChange={onCategoryChange} />
         <div style={s.divider} />
         <RadiusSlider value={radius} onChange={onRadiusChange} />
+        <div style={s.analyzeBtnWrap}>
+          <button
+            style={{ ...s.analyzeBtn, ...(!canAnalyze || isAnalyzing ? s.analyzeBtnDisabled : {}) }}
+            onClick={onAnalyze}
+            disabled={!canAnalyze || isAnalyzing}
+          >
+            {isAnalyzing ? (
+              <>
+                <span style={s.analyzeBtnSpinner} />
+                Menganalisis…
+              </>
+            ) : (
+              <>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+                </svg>
+                {!selectedLocation ? 'Pilih lokasi di peta' : !selectedCategory ? 'Pilih kategori' : 'Mulai Analisis'}
+              </>
+            )}
+          </button>
+        </div>
         <div style={s.divider} />
       </div>
 
@@ -78,7 +99,7 @@ const s = {
   sidebar: {
     width: 282, flexShrink: 0,
     display: 'flex', flexDirection: 'column',
-    background: 'var(--sb-bg)',
+    background: 'var(--sb-surface)',
     borderRight: '1px solid var(--sb-border)',
     overflow: 'hidden',
   },
@@ -97,6 +118,31 @@ const s = {
   footerText: { fontSize: 9, color: 'var(--txt-3)', letterSpacing: '0.3px' },
   footerDot: { fontSize: 9, color: 'var(--txt-3)' },
 
+  analyzeBtnWrap: { padding: '10px 14px 12px' },
+  analyzeBtn: {
+    width: '100%', padding: '10px', border: 'none',
+    borderRadius: 8, cursor: 'pointer',
+    background: 'var(--cta)',
+    boxShadow: '0 4px 14px rgba(6,182,212,0.3)',
+    color: '#fff', fontSize: 12, fontWeight: 700,
+    fontFamily: 'inherit',
+    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+    transition: 'all 0.15s',
+  },
+  analyzeBtnDisabled: {
+    background: 'var(--sb-card)',
+    color: 'var(--txt-3)',
+    boxShadow: 'none',
+    cursor: 'not-allowed',
+  },
+  analyzeBtnSpinner: {
+    width: 12, height: 12, borderRadius: '50%',
+    border: '2px solid rgba(255,255,255,0.3)',
+    borderTopColor: '#fff',
+    animation: 'spin 0.7s linear infinite',
+    display: 'inline-block', flexShrink: 0,
+  },
+
   loading: {
     flex: 1, display: 'flex', flexDirection: 'column',
     alignItems: 'center', justifyContent: 'center',
@@ -104,14 +150,14 @@ const s = {
   },
   pulseRing: {
     width: 52, height: 52, borderRadius: '50%',
-    border: '2px solid rgba(37,99,235,0.3)',
+    border: '2px solid rgba(6,182,212,0.2)',
     display: 'flex', alignItems: 'center', justifyContent: 'center',
     animation: 'pulse-ring 1.5s ease-out infinite',
   },
   pulseCore: {
     width: 20, height: 20, borderRadius: '50%',
     background: 'var(--accent)',
-    boxShadow: '0 0 12px rgba(37,99,235,0.5)',
+    boxShadow: '0 0 12px rgba(6,182,212,0.35)',
   },
   loadingTitle: { fontSize: 12, fontWeight: 700, color: 'var(--txt-1)' },
   loadingDesc: { fontSize: 10, color: 'var(--txt-3)', textAlign: 'center', marginTop: -4 },

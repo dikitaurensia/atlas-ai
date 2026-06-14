@@ -2,35 +2,35 @@
 @import 'leaflet/dist/leaflet.css';
 
 :root {
-  /* Light palette */
-  --sb-bg:        #F8FAFC;
-  --sb-surface:   #FFFFFF;
-  --sb-card:      #FFFFFF;
-  --sb-hover:     #F1F5F9;
-  --sb-border:    rgba(0,0,0,0.08);
-  --sb-border-md: rgba(0,0,0,0.13);
+  --sb-bg:        #0F172A;
+  --sb-surface:   #1E293B;
+  --sb-card:      #243248;
+  --sb-hover:     #243248;
+  --sb-border:    #2D3D5A;
+  --sb-border-md: #3D5070;
 
-  /* Text */
-  --txt-1: #0F172A;
-  --txt-2: #475569;
-  --txt-3: #94A3B8;
-  --txt-4: #CBD5E1;
+  --txt-1: #F8FAFC;
+  --txt-2: #94A3B8;
+  --txt-3: #64748B;
+  --txt-4: #334155;
 
-  /* Accent */
-  --accent:       #2563EB;
-  --accent-h:     #1D4ED8;
-  --accent-bg:    rgba(37,99,235,0.08);
-  --accent-bd:    rgba(37,99,235,0.22);
+  --accent:    #06B6D4;
+  --accent-h:  #0891B2;
+  --accent-bg: rgba(6,182,212,0.1);
+  --accent-bd: rgba(6,182,212,0.25);
 
-  /* Semantic */
+  --cta:    #06B6D4;
+  --cta-h:  #0891B2;
+  --cta-bg: rgba(6,182,212,0.1);
+  --cta-bd: rgba(6,182,212,0.25);
+
   --green:  #10B981;
   --yellow: #F59E0B;
   --red:    #EF4444;
   --blue:   #3B82F6;
   --purple: #8B5CF6;
 
-  /* Surface light (map overlays) */
-  --surf-glass: rgba(255,255,255,0.96);
+  --surf-glass: rgba(15,23,42,0.9);
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -48,12 +48,12 @@ html, body {
 /* Sidebar scrollbar */
 .sidebar-scroll::-webkit-scrollbar { width: 3px; }
 .sidebar-scroll::-webkit-scrollbar-track { background: transparent; }
-.sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+.sidebar-scroll::-webkit-scrollbar-thumb { background: #2D3D5A; border-radius: 2px; }
 
 /* Global scrollbar */
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 2px; }
+::-webkit-scrollbar-thumb { background: #2D3D5A; border-radius: 2px; }
 
 /* Range input */
 input[type='range'] { -webkit-appearance: none; appearance: none; }
@@ -61,10 +61,10 @@ input[type='range']::-webkit-slider-thumb {
   -webkit-appearance: none; appearance: none;
   width: 14px; height: 14px; border-radius: 50%;
   background: var(--accent); border: 2px solid #fff;
-  box-shadow: 0 1px 4px rgba(37,99,235,0.4);
+  box-shadow: 0 1px 4px rgba(6,182,212,0.3);
   cursor: pointer;
 }
-input[type='range']::-webkit-slider-runnable-track { height: 4px; border-radius: 2px; }
+input[type='range']::-webkit-slider-runnable-track { height: 4px; border-radius: 2px; background: #2D3D5A; }
 
 /* Mobile touch improvements */
 @media (max-width: 767px) {
@@ -74,24 +74,26 @@ input[type='range']::-webkit-slider-runnable-track { height: 4px; border-radius:
 
 /* Leaflet popup dark theme */
 .leaflet-popup-content-wrapper {
-  background: rgba(17,24,39,0.95) !important;
+  background: rgba(30,41,59,0.97) !important;
   border: 1px solid rgba(255,255,255,0.08) !important;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.5) !important;
-  border-radius: 8px !important;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.4) !important;
+  border-radius: 10px !important;
   backdrop-filter: blur(8px);
-  color: #F1F5F9 !important;
+  color: #F8FAFC !important;
 }
-.leaflet-popup-tip { background: rgba(17,24,39,0.95) !important; }
+.leaflet-popup-tip { background: rgba(30,41,59,0.97) !important; }
+.leaflet-popup-tip-container { filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); }
 .leaflet-popup-content { margin: 10px 12px !important; }
 .leaflet-attribution-flag { display: none !important; }
 .leaflet-control-attribution {
-  background: rgba(10,15,26,0.7) !important;
+  background: rgba(15,23,42,0.8) !important;
   backdrop-filter: blur(4px);
   color: rgba(255,255,255,0.3) !important;
   font-size: 9px !important;
   border-radius: 4px 0 0 0 !important;
+  border: 1px solid rgba(255,255,255,0.06) !important;
 }
-.leaflet-control-attribution a { color: rgba(255,255,255,0.35) !important; }
+.leaflet-control-attribution a { color: rgba(6,182,212,0.7) !important; }
 
 /* Animations */
 @keyframes spin        { to { transform: rotate(360deg); } }

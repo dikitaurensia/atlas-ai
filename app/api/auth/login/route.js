@@ -11,7 +11,7 @@ export async function POST(req) {
     }
 
     const [user] = await sql`
-      SELECT id, name, email, password_hash FROM users WHERE email = ${email.toLowerCase().trim()}
+      SELECT id, name, bisnis_name, email, password_hash FROM users WHERE email = ${email.toLowerCase().trim()}
     `
     if (!user) {
       return NextResponse.json({ error: 'Email atau password salah' }, { status: 401 })
@@ -22,8 +22,8 @@ export async function POST(req) {
       return NextResponse.json({ error: 'Email atau password salah' }, { status: 401 })
     }
 
-    const token = await signToken({ userId: user.id, email: user.email, name: user.name })
-    const res = NextResponse.json({ ok: true, user: { id: user.id, name: user.name, email: user.email } })
+    const token = await signToken({ userId: user.id, email: user.email, name: user.name, bisnis_name: user.bisnis_name })
+    const res = NextResponse.json({ ok: true, user: { id: user.id, name: user.name, bisnis_name: user.bisnis_name, email: user.email } })
     res.cookies.set(COOKIE, token, cookieOpts())
     return res
   } catch (err) {
