@@ -76,7 +76,7 @@ const s = {
   controls: { flexShrink: 0 },
   divider: { height: 1, background: 'var(--sb-border)', margin: '0' },
   resultArea: {
-    flex: 1, overflow: 'hidden',
+    flex: 1, minHeight: 0, overflowY: 'auto',
     display: 'flex', flexDirection: 'column',
   },
   footer: {

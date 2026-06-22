@@ -195,7 +195,7 @@ function ScoreRing({ score, color, glow }) {
 
 const s = {
   wrap: {
-    flex: 1, overflowY: 'auto',
+    flex: 1, minHeight: 0, overflowY: 'auto',
     display: 'flex', flexDirection: 'column', gap: 8,
     padding: '10px 12px 16px',
     animation: 'fade-in 0.3s ease',
