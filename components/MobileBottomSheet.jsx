@@ -71,7 +71,11 @@ export default function MobileBottomSheet({
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
-        onClick={() => !dragging && setExpanded(e => !e)}
+        onClick={() => {
+          if (dragging) return
+          if (!expanded && canAnalyze) { onAnalyze(); setExpanded(true) }
+          else setExpanded(e => !e)
+        }}
       >
         <div style={s.handle} />
         {!expanded && selectedCategory && (

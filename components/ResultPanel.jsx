@@ -18,9 +18,9 @@ function scoreColor(s) {
 }
 
 function gradeConfig(overall) {
-  if (overall >= 75) return { label: 'Sangat Potensial', color: '#10B981', glow: 'rgba(16,185,129,0.25)' }
-  if (overall >= 60) return { label: 'Potensi Bagus',    color: '#3B82F6', glow: 'rgba(59,130,246,0.25)' }
-  if (overall >= 45) return { label: 'Cukup Potensial',  color: '#F59E0B', glow: 'rgba(245,158,11,0.25)' }
+  if (overall >= 80) return { label: 'Sangat Potensial', color: '#10B981', glow: 'rgba(16,185,129,0.25)' }
+  if (overall >= 70) return { label: 'Potensi Bagus',    color: '#3B82F6', glow: 'rgba(59,130,246,0.25)' }
+  if (overall >= 60) return { label: 'Cukup Potensial',  color: '#F59E0B', glow: 'rgba(245,158,11,0.25)' }
   return                     { label: 'Kurang Ideal',     color: '#EF4444', glow: 'rgba(239,68,68,0.25)' }
 }
 
@@ -75,7 +75,10 @@ export default function ResultPanel({ result, onSave, isSaved, category, locatio
             {result.dimensions.map(d => (
               <div key={d.label} style={s.dimRow}>
                 <div style={s.dimTop}>
-                  <span style={s.dimLabel}>{d.label}</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                    <span style={s.dimLabel}>{d.label}</span>
+                    {d.source === 'db+osm' && <span style={s.osmBadge}>OSM</span>}
+                  </div>
                   {d.score !== null
                     ? <span style={{ ...s.dimScore, color: scoreColor(d.score) }}>{d.score}</span>
                     : <span style={s.dimNA}>N/A</span>
@@ -92,19 +95,19 @@ export default function ResultPanel({ result, onSave, isSaved, category, locatio
           </div>
         </div>
 
-        {/* Profit Card */}
+        {/* Profit Card — Analog Store Method (P25/P75 + margin) */}
         <div style={s.profitCard}>
           <div style={s.profitTop}>
             <span style={s.cardLabel}>ESTIMASI PROFIT / BULAN</span>
             <div style={{ display: 'flex', gap: 5, alignItems: 'center' }}>
               {result.scale && <span style={s.scaleBadge}>Skala {result.scale}</span>}
-              <span style={s.profitBadge}>ESB Data</span>
+              <span style={s.profitBadge}>Analog Store</span>
             </div>
           </div>
-          {/* AC2.3: warning data terbatas */}
-          {result.lowReferenceData && (
+          {/* AC2.3: warning data terbatas — hanya tampil kalau profit masih bisa dihitung */}
+          {result.lowReferenceData && result.profitMin !== null && (
             <div style={s.profitWarning}>
-              ⚠ Data terbatas (&lt; 5 outlet referensi). Estimasi bersifat indikatif.
+              ⚠ Data terbatas (&lt; 5 outlet analog). Estimasi bersifat indikatif.
             </div>
           )}
           {/* AC2.5: warning volatilitas tinggi */}
@@ -113,18 +116,53 @@ export default function ResultPanel({ result, onSave, isSaved, category, locatio
               ⚠ Volatilitas data tinggi — estimasi memiliki tingkat ketidakpastian lebih besar.
             </div>
           )}
-          <div style={{ ...s.profitRange, ...(result.lowReferenceData ? s.profitRangeMuted : {}) }}>
-            Rp {result.profitMin} jt
-            <span style={s.profitSep}> – </span>
-            Rp {result.profitMax} jt
-          </div>
+          {result.profitMin !== null ? (
+            <div style={{ ...s.profitRange, ...(result.lowReferenceData ? s.profitRangeMuted : {}) }}>
+              Rp {result.profitMin} jt
+              <span style={s.profitSep}> – </span>
+              Rp {result.profitMax} jt
+            </div>
+          ) : (
+            <div style={s.profitUnavailable}>
+              Data terbatas — estimasi tidak tersedia
+            </div>
+          )}
           <div style={s.profitNote}>
-            {result.referenceCount
-              ? `Referensi ${result.referenceCount}+ outlet ESB dalam radius ${result.referenceRadius} km`
-              : 'Data estimasi dari benchmark kategori'
+            {result.profitSource === 'analog'
+              ? `P25–P75 dari outlet analog · margin ${result.margin != null ? Math.round(result.margin * 100) : '—'}%`
+              : 'Data outlet analog tidak mencukupi (min. 5 outlet)'
             }
           </div>
         </div>
+
+        {/* Huff Gravity Model card */}
+        {result.huff && (
+          <div style={s.huffCard}>
+            <div style={s.cardHeader}>
+              <span style={s.cardLabel}>HUFF GRAVITY MODEL</span>
+              <span style={s.huffBadge}>λ={result.huff.lambda}</span>
+            </div>
+            <div style={s.huffStats}>
+              <div style={s.huffStat}>
+                <span style={s.huffValue}>{result.huff.captureRate}%</span>
+                <span style={s.huffLabel}>Capture Rate</span>
+              </div>
+              <div style={s.huffDivider} />
+              <div style={s.huffStat}>
+                <span style={s.huffValue}>{result.huff.capturedPopulation.toLocaleString('id')}</span>
+                <span style={s.huffLabel}>Potensi Pelanggan</span>
+              </div>
+              <div style={s.huffDivider} />
+              <div style={s.huffStat}>
+                <span style={s.huffValue}>{result.huff.popRadius.toLocaleString('id')}</span>
+                <span style={s.huffLabel}>Populasi Radius</span>
+              </div>
+            </div>
+            <div style={s.huffNote}>
+              {result.huff.competitorCount} kompetitor diperhitungkan dalam model
+            </div>
+          </div>
+        )}
 
         {/* Tags */}
         <div style={s.tagsSection}>
@@ -222,7 +260,7 @@ const s = {
     border: '1px solid var(--sb-border)',
     boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
   },
-  cardHeader: { padding: '10px 14px 8px', borderBottom: '1px solid var(--sb-border)' },
+  cardHeader: { padding: '10px 14px 8px', borderBottom: '1px solid var(--sb-border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' },
   cardLabel: {
     fontSize: 9, fontWeight: 700, letterSpacing: '0.7px',
     color: 'var(--txt-3)', textTransform: 'uppercase',
@@ -240,6 +278,7 @@ const s = {
   dimFill:   { height: '100%', borderRadius: 2, transition: 'width 0.7s ease' },
   dimFillNA: { height: '100%', borderRadius: 2, width: '100%', background: 'repeating-linear-gradient(90deg, var(--sb-border) 0, var(--sb-border) 4px, transparent 4px, transparent 8px)' },
   dimNA:     { fontSize: 11, fontWeight: 600, color: 'var(--txt-3)' },
+  osmBadge:  { fontSize: 8, fontWeight: 700, letterSpacing: '0.4px', color: 'var(--accent)', background: 'var(--accent-bg)', border: '1px solid var(--accent-bd)', borderRadius: 3, padding: '1px 4px' },
   unsupportedWrap: {
     flex: 1, display: 'flex', flexDirection: 'column',
     alignItems: 'center', justifyContent: 'center',
@@ -278,7 +317,26 @@ const s = {
   profitRange: { fontSize: 22, fontWeight: 800, color: '#67E8F9', marginBottom: 4, lineHeight: 1 },
   profitRangeMuted: { color: '#94A3B8', fontSize: 18 },
   profitSep: { color: '#06B6D4', fontWeight: 400 },
+  profitUnavailable: { fontSize: 13, fontWeight: 600, color: '#94A3B8', marginBottom: 4, fontStyle: 'italic' },
   profitNote: { fontSize: 9.5, color: 'var(--txt-3)' },
+
+  huffCard: {
+    background: 'var(--sb-surface)', borderRadius: 12,
+    border: '1px solid var(--sb-border)',
+    boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
+    overflow: 'hidden',
+  },
+  huffBadge: {
+    fontSize: 8, fontWeight: 700, color: '#A78BFA',
+    background: 'rgba(139,92,246,0.12)', padding: '2px 6px',
+    borderRadius: 4, border: '1px solid rgba(139,92,246,0.25)',
+  },
+  huffStats: { display: 'flex', alignItems: 'stretch', padding: '10px 14px' },
+  huffStat: { flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 },
+  huffDivider: { width: 1, background: 'var(--sb-border)', margin: '0 8px' },
+  huffValue: { fontSize: 16, fontWeight: 800, color: '#A78BFA' },
+  huffLabel: { fontSize: 9, color: 'var(--txt-3)', textAlign: 'center', lineHeight: 1.3 },
+  huffNote: { fontSize: 9, color: 'var(--txt-3)', padding: '0 14px 8px', textAlign: 'center' },
 
   tagsSection: { display: 'flex', flexWrap: 'wrap', gap: 5 },
   tag: { fontSize: 9.5, fontWeight: 600, padding: '3px 8px', borderRadius: 5 },

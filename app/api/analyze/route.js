@@ -19,7 +19,10 @@ async function fetchAccessibilityScore(lat, lng, radius) {
     if (!res.ok) return null
     const data = await res.json()
     const total = parseInt(data.elements?.[0]?.tags?.total || '0', 10)
-    const score = Math.min(95, Math.max(20, Math.round(20 + total * 3.5)))
+    // Normalisasi ke densitas per km² — skor tidak bergantung radius
+    const areakm2 = Math.PI * Math.pow(radius / 1000, 2)
+    const density = total / areakm2
+    const score = Math.min(95, Math.max(20, Math.round(20 + density * 5)))
     return { score, transportCount: total }
   } catch {
     return null
@@ -39,7 +42,10 @@ async function fetchFootTrafficScore(lat, lng, radius) {
     if (!res.ok) return null
     const data = await res.json()
     const total = parseInt(data.elements?.[0]?.tags?.total || '0', 10)
-    const score = Math.min(95, Math.max(20, Math.round(20 + total * 0.95)))
+    // Normalisasi ke densitas per km² — skor tidak bergantung radius
+    const areakm2 = Math.PI * Math.pow(radius / 1000, 2)
+    const density = total / areakm2
+    const score = Math.min(95, Math.max(20, Math.round(20 + density * 0.75)))
     return { score, amenityCount: total }
   } catch {
     return null
@@ -96,6 +102,31 @@ async function fetchDBData(dataSource, lat, lng, category, radius) {
   }
 }
 
+async function fetchPOIs(lat, lng, radius) {
+  try {
+    const q = `[out:json][timeout:10];(node["amenity"~"restaurant|cafe|fast_food|bar|food_court"](around:${radius},${lat},${lng});node["shop"~"mall|supermarket|convenience"](around:${radius},${lat},${lng}););out 120;`
+    const res = await fetch(
+      `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(q)}`,
+      {
+        headers: { 'Accept': '*/*', 'User-Agent': 'AtlasAI/1.0 (FnB location intelligence; contact: atlas@esb.co.id)' },
+        signal: AbortSignal.timeout(12000),
+      }
+    )
+    if (!res.ok) return []
+    const data = await res.json()
+    return data.elements
+      .filter(e => e.lat != null && e.lon != null)
+      .map(e => ({
+        lat: e.lat,
+        lng: e.lon,
+        type: e.tags?.amenity || e.tags?.shop || 'other',
+        name: e.tags?.name || null,
+      }))
+  } catch {
+    return []
+  }
+}
+
 export async function POST(request) {
   // BUG-001: Auth guard — endpoint tidak boleh publik
   const token = (await cookies()).get(COOKIE)?.value
@@ -135,10 +166,11 @@ export async function POST(request) {
 
     const dataSource = await getDataSource()
 
-    const [dbResult, trafficResult, accessibilityResult] = await Promise.allSettled([
+    const [dbResult, trafficResult, accessibilityResult, poisResult] = await Promise.allSettled([
       fetchDBData(dataSource, lat, lng, category, r),
       fetchFootTrafficScore(lat, lng, r),
       fetchAccessibilityScore(lat, lng, r),
+      fetchPOIs(lat, lng, r),
     ])
 
     let nearbyCompetitors = []
@@ -161,6 +193,9 @@ export async function POST(request) {
 
     const footTraffic    = trafficResult.status === 'fulfilled'      ? trafficResult.value      : null
     const accessibility  = accessibilityResult.status === 'fulfilled' ? accessibilityResult.value : null
+    const pois           = poisResult.status === 'fulfilled' && Array.isArray(poisResult.value) ? poisResult.value : []
+    const OSM_FOOD_TYPES = new Set(['restaurant', 'cafe', 'fast_food', 'bar', 'food_court'])
+    const osmFoodCount   = pois.filter(p => OSM_FOOD_TYPES.has(p.type)).length
 
     if (!demographics) {
       return Response.json({
@@ -171,10 +206,10 @@ export async function POST(request) {
 
     const result = generateAnalysis(
       { lat, lng }, category, r,
-      { nearbyCompetitors, benchmark, footTraffic, accessibility, demographics },
+      { nearbyCompetitors, benchmark, footTraffic, accessibility, demographics, osmFoodCount },
       scale
     )
-    return Response.json(result)
+    return Response.json({ ...result, pois })
 
   } catch (err) {
     console.error('[analyze]', err)

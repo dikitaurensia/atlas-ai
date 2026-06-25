@@ -8,6 +8,7 @@ import RiwayatSider from './RiwayatSider'
 import MobileHeader from './MobileHeader'
 import MobileBottomSheet from './MobileBottomSheet'
 import useIsMobile from '@/hooks/useIsMobile'
+import { useTheme } from '@/hooks/useTheme'
 
 function formatDate(iso) {
   const d = new Date(iso)
@@ -19,6 +20,7 @@ let _tempSeq = 0
 function tempId() { return `tmp-${++_tempSeq}` }
 
 export default function App() {
+  const { theme, toggleTheme } = useTheme()
   const [selectedCategory, setSelectedCategory] = useState(null)
   const [selectedLocation, setSelectedLocation] = useState(null)
   const [radius, setRadius] = useState(500)
@@ -223,7 +225,9 @@ export default function App() {
       onLocationSelect={handleLocationSelect}
       radius={radius}
       analysisResult={analysisResult}
+      isAnalyzing={isAnalyzing}
       isMobile={isMobile}
+      theme={theme}
     />
   )
 
@@ -234,6 +238,8 @@ export default function App() {
           historyCount={historyItems.length}
           onRiwayatClick={() => setRiwayatOpen(true)}
           onLocationSearch={handleLocationSearch}
+          theme={theme}
+          onToggleTheme={toggleTheme}
         />
         {sharedRiwayat}
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
@@ -265,6 +271,8 @@ export default function App() {
         historyCount={historyItems.length}
         onRiwayatClick={() => setRiwayatOpen(true)}
         onLocationSearch={handleLocationSearch}
+        theme={theme}
+        onToggleTheme={toggleTheme}
       />
       {sharedRiwayat}
       <div className="app-body">
@@ -284,12 +292,7 @@ export default function App() {
           isSaved={!!savedKey}
           selectedLocation={selectedLocation}
         />
-        <MapView
-          selectedLocation={selectedLocation}
-          onLocationSelect={handleLocationSelect}
-          radius={radius}
-          analysisResult={analysisResult}
-        />
+        {sharedMap}
       </div>
     </div>
   )
