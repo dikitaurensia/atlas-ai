@@ -208,61 +208,61 @@ export async function run(dataSource: DataSource): Promise<void> {
       ('Kafe Permata Hijau',         'Lainnya', -6.2328, 106.7778, 'Permata Hijau')
   `)
 
-  // Revenue by brand pattern
-  const revenueUpdates: [number, number, string][] = [
-    [250, 450, 'McDonalds%'],
-    [150, 300, 'Burger King%'],
-    [80,  160, 'Richeese%'],
-    [200, 380, 'Shake Shack%'],
-    [120, 220, 'Wendys%'],
-    [50,  120, 'Flame Burger%'],
-    [30,   70, 'Burger Bangor%'],
-    [25,   60, 'Burgushi%'],
-    [180, 350, 'KFC%'],
-    [60,  130, 'CFC%'],
-    [80,  160, 'Geprek Bensu%'],
-    [40,   90, 'Geprek Express%'],
-    [50,  110, 'Sabana%'],
-    [30,   70, 'Ayam Bakar%'],
-    [35,   80, 'Ayam Geprek%'],
-    [30,   65, 'Ayam Penyet%'],
-    [300, 600, 'Starbucks%'],
-    [80,  180, 'Kopi Kenangan%'],
-    [50,  120, 'Janji Jiwa%'],
-    [60,  130, 'Fore Coffee%'],
-    [40,  100, 'Tomoro Coffee%'],
-    [35,   80, 'Kopi Soe%'],
-    [100, 200, 'Mie Gacoan%'],
-    [30,   70, 'Bakso Malang%'],
-    [25,   60, 'Bakso Pak Man%'],
-    [20,   50, 'Mie Ayam Solo%'],
-    [25,   55, 'Bakso Urat%'],
-    [60,  140, 'Chatime%'],
-    [40,   90, 'Mixue%'],
-    [80,  160, 'KOI The%'],
-    [30,   70, 'Xi Bo Ba%'],
-    [25,   60, 'Boba Time%'],
-    [80,  160, 'Waroeng%'],
-    [50,  120, 'Sate Senayan%'],
-    [30,   80, 'Restoran%'],
-    [15,   40, 'Warung%'],
-    [25,   65, 'Kafe%'],
-    [20,   55, 'Nasi%'],
-    [20,   50, 'Soto%'],
-    [25,   55, 'Bakso Soto%'],
-    [20,   50, 'Sate Taichan%'],
+  // Revenue by brand pattern (midpoint values in jt)
+  const revenueUpdates: [number, string][] = [
+    [350, 'McDonalds%'],
+    [225, 'Burger King%'],
+    [120, 'Richeese%'],
+    [290, 'Shake Shack%'],
+    [170, 'Wendys%'],
+    [ 85, 'Flame Burger%'],
+    [ 50, 'Burger Bangor%'],
+    [ 43, 'Burgushi%'],
+    [265, 'KFC%'],
+    [ 95, 'CFC%'],
+    [120, 'Geprek Bensu%'],
+    [ 65, 'Geprek Express%'],
+    [ 80, 'Sabana%'],
+    [ 50, 'Ayam Bakar%'],
+    [ 58, 'Ayam Geprek%'],
+    [ 48, 'Ayam Penyet%'],
+    [450, 'Starbucks%'],
+    [130, 'Kopi Kenangan%'],
+    [ 85, 'Janji Jiwa%'],
+    [ 95, 'Fore Coffee%'],
+    [ 70, 'Tomoro Coffee%'],
+    [ 58, 'Kopi Soe%'],
+    [150, 'Mie Gacoan%'],
+    [ 50, 'Bakso Malang%'],
+    [ 43, 'Bakso Pak Man%'],
+    [ 35, 'Mie Ayam Solo%'],
+    [ 40, 'Bakso Urat%'],
+    [100, 'Chatime%'],
+    [ 65, 'Mixue%'],
+    [120, 'KOI The%'],
+    [ 50, 'Xi Bo Ba%'],
+    [ 43, 'Boba Time%'],
+    [120, 'Waroeng%'],
+    [ 85, 'Sate Senayan%'],
+    [ 55, 'Restoran%'],
+    [ 28, 'Warung%'],
+    [ 45, 'Kafe%'],
+    [ 38, 'Nasi%'],
+    [ 35, 'Soto%'],
+    [ 40, 'Bakso Soto%'],
+    [ 35, 'Sate Taichan%'],
   ]
 
-  for (const [min, max, pattern] of revenueUpdates) {
+  for (const [revenue, pattern] of revenueUpdates) {
     await dataSource.query(
-      `UPDATE competitors SET revenue_min_jt=$1, revenue_max_jt=$2 WHERE name LIKE $3`,
-      [min, max, pattern]
+      `UPDATE competitors SET revenue_jt=$1 WHERE name LIKE $2`,
+      [revenue, pattern]
     )
   }
 
   // Fallback for any remaining nulls
   await dataSource.query(
-    `UPDATE competitors SET revenue_min_jt=20, revenue_max_jt=60 WHERE revenue_min_jt IS NULL`
+    `UPDATE competitors SET revenue_jt=40 WHERE revenue_jt IS NULL`
   )
 
   const [{ count }] = await dataSource.query(`SELECT COUNT(*) FROM competitors`)

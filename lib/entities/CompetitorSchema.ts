@@ -7,8 +7,7 @@ export interface Competitor {
   lat: number
   lng: number
   address?: string
-  revenue_min_jt?: number
-  revenue_max_jt?: number
+  revenue_jt?: number
   created_at: Date
 }
 
@@ -22,8 +21,7 @@ export const CompetitorSchema = new EntitySchema<Competitor>({
     lat: { type: 'double precision' },
     lng: { type: 'double precision' },
     address: { type: 'text', nullable: true },
-    revenue_min_jt: { type: 'integer', nullable: true },
-    revenue_max_jt: { type: 'integer', nullable: true },
+    revenue_jt: { type: 'integer', nullable: true },
     created_at: { type: 'timestamptz', createDate: true },
   },
   indices: [

@@ -60,10 +60,10 @@ async function fetchDBData(dataSource, lat, lng, category, radius) {
   const lngMin = lng - radiusLng
   const lngMax = lng + radiusLng
 
-  const [competitors, benchmarks, demographics] = await Promise.all([
+  const [competitorsResult, benchmarksResult, demographicsResult] = await Promise.allSettled([
     dataSource.query(
       `SELECT * FROM (
-         SELECT id, name, lat, lng, address, revenue_min_jt, revenue_max_jt,
+         SELECT id, name, lat, lng, address, revenue_jt,
            6371000 * acos(
              LEAST(1.0,
                cos(radians($1)) * cos(radians(lat)) *
@@ -95,10 +95,14 @@ async function fetchDBData(dataSource, lat, lng, category, radius) {
     ),
   ])
 
+  if (competitorsResult.status === 'rejected') {
+    console.error('[fetchDBData] competitors query failed:', competitorsResult.reason?.message)
+  }
+
   return {
-    competitors,
-    benchmark: benchmarks[0] || null,
-    demographics: demographics[0] || null,
+    competitors: competitorsResult.status === 'fulfilled' ? competitorsResult.value : [],
+    benchmark:   benchmarksResult.status === 'fulfilled'  ? (benchmarksResult.value[0] || null) : null,
+    demographics: demographicsResult.status === 'fulfilled' ? (demographicsResult.value[0] || null) : null,
   }
 }
 
